@@ -80,7 +80,7 @@ import { whatsappDeliveryMessage } from '../../shared/utils/whatsapp-messages';
           <input
             type="text"
             formControlName="address"
-            placeholder="Barrio Villa Estadio, Malambo"
+            placeholder="Barrio El Carmen, Malambo"
             autocomplete="off"
             class="w-full rounded-xl border border-cream-200 bg-white px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
           />

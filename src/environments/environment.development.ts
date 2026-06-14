@@ -9,6 +9,7 @@ export const environment = {
     nequi: '3009999999',
     bancolombiaAccount: '123 456 78910',
     bancolombiaHolder: 'Deli Pasabocas',
+    nequiQrImage: '/nequi-qr2.jpeg',
     /** Costo fijo adicional por freír cada bandeja en pedidos para eventos. */
     fryCostPerTray: 5000,
     /** Máximo de bandejas del mismo producto en pedido normal (home). */

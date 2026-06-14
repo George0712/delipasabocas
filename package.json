@@ -6,6 +6,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "deploy": "npm run build && npx netlify-cli deploy --prod --dir=dist/delipasabocas/browser --no-build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = "dist/delipasabocas/browser"
+
+[build.environment]
+  NODE_VERSION = "22.22.0"
+  # SPA estática: evita el plugin @netlify/angular-runtime (solo necesario para SSR).
+  NETLIFY_SKIP_FRAMEWORK_DETECTION = "true"
+
+# SPA: Angular Router necesita servir index.html en rutas profundas.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

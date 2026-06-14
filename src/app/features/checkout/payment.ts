@@ -15,6 +15,7 @@ import { OrderService } from '../../core/services/order.service';
 import { OrderStateService } from '../../core/services/order-state.service';
 import { CopPipe } from '../../shared/pipes/cop.pipe';
 import { FlowHeader } from '../../shared/components/flow-header/flow-header';
+import { QrImage } from '../../shared/components/qr-image/qr-image';
 import { WhatsappButton } from '../../shared/components/whatsapp-button/whatsapp-button';
 import {
   whatsappPaymentReceiptMessage,
@@ -24,7 +25,7 @@ import {
 @Component({
   selector: 'app-payment',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CopPipe, FlowHeader, WhatsappButton],
+  imports: [CopPipe, FlowHeader, QrImage, WhatsappButton],
   template: `
     <app-flow-header title="Pago" />
 
@@ -56,11 +57,11 @@ import {
       <div class="mt-5 rounded-2xl border border-cream-200 bg-white p-4">
         @if (selected() === 'nequi') {
           <p class="text-sm font-semibold text-gray-800">Nequi</p>
-          <div
-            class="mx-auto my-4 grid h-36 w-36 place-items-center rounded-xl bg-cream-100 text-xs text-gray-400"
-          >
-            Escanea el QR
-          </div>
+          <app-qr-image
+            class="my-4 block"
+            [src]="nequiQrImage"
+            alt="Código QR de Nequi para pagar"
+          />
           <p class="text-center text-sm text-gray-600">
             o al número
             <span class="font-semibold text-gray-900">{{ business().nequi }}</span>
@@ -124,6 +125,7 @@ export class Payment implements OnInit {
   private readonly router = inject(Router);
   protected readonly orderState = inject(OrderStateService);
 
+  readonly nequiQrImage = environment.business.nequiQrImage;
   readonly business = signal<BusinessSettings>({
     nequi: environment.business.nequi,
     bancolombiaAccount: environment.business.bancolombiaAccount,
