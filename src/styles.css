@@ -1,0 +1,91 @@
+@import 'tailwindcss';
+
+/* Paleta de marca DeliPasabocas */
+@theme {
+  --color-brand-50: #fbeae9;
+  --color-brand-100: #f4c9c6;
+  --color-brand-200: #e89893;
+  --color-brand-300: #d96a63;
+  --color-brand-400: #b8423b;
+  --color-brand-500: #7a1d2b;
+  --color-brand-600: #6a1825;
+  --color-brand-700: #56131e;
+  --color-brand-800: #420e17;
+  --color-brand-900: #2e0a10;
+
+  --color-accent-400: #f6a623;
+  --color-accent-500: #ef8a1e;
+  --color-accent-600: #d97316;
+
+  --color-cream-50: #fffaf4;
+  --color-cream-100: #fdf3e8;
+  --color-cream-200: #f8e6d3;
+
+  --font-display: 'Pacifico', cursive;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--color-cream-50);
+  color: #1f2937;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-brand {
+  font-family: var(--font-display);
+}
+
+@keyframes success-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes success-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+.animate-success-pop {
+  animation: success-pop 0.6s cubic-bezier(0.18, 0.89, 0.32, 1.28) both;
+}
+
+.animate-success-ring {
+  animation: success-ring 0.9s ease-out 0.2s both;
+}
+
+@keyframes fade-up {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s ease-out both;
+}
