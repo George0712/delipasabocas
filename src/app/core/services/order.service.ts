@@ -8,6 +8,17 @@ import {
   ORDER_STATUS_LABELS,
 } from '../models/order.model';
 import { SupabaseService } from './supabase.service';
+import { formatOrderItemName } from '../../shared/utils/format';
+
+interface OrderItemRow {
+  id: string;
+  product_id: string | null;
+  product_name: string | null;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
+  products: { name: string; description: string | null } | null;
+}
 
 interface OrderRow {
   id: string;
@@ -24,6 +35,7 @@ interface OrderRow {
   status: OrderStatus;
   created_at: string;
   updated_at: string;
+  order_items?: OrderItemRow[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -54,6 +66,7 @@ export class OrderService {
       },
       p_items: order.items.map((item) => ({
         product_id: item.productId,
+        product_name: item.productName,
         quantity: item.quantity,
         unit_price: item.unitPrice,
         subtotal: item.subtotal,
@@ -74,7 +87,20 @@ export class OrderService {
   async list(): Promise<Order[]> {
     const { data, error } = await this.supabase.client
       .from('orders')
-      .select('*')
+      .select(
+        `
+        *,
+        order_items (
+          id,
+          product_id,
+          product_name,
+          quantity,
+          unit_price,
+          subtotal,
+          products ( name, description )
+        )
+      `,
+      )
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -159,9 +185,33 @@ export class OrderService {
       shippingCost: Number(row.shipping_cost),
       total: Number(row.total),
       status: row.status,
-      items: [],
+      items: (row.order_items ?? []).map((item) => this.mapItemRow(item)),
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+    };
+  }
+
+  private mapItemRow(item: OrderItemRow) {
+    const storedName = item.product_name?.trim();
+    const product = item.products;
+    const rawName =
+      storedName ||
+      (product
+        ? `${product.name}${product.description ? ` · ${product.description}` : ''}`
+        : 'Ítem personalizado');
+
+    const mapped = {
+      id: item.id,
+      productId: item.product_id,
+      productName: rawName,
+      quantity: item.quantity,
+      unitPrice: Number(item.unit_price),
+      subtotal: Number(item.subtotal),
+    };
+
+    return {
+      ...mapped,
+      productName: formatOrderItemName(mapped),
     };
   }
 }

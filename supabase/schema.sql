@@ -101,6 +101,7 @@ create table if not exists public.order_items (
   id uuid primary key default gen_random_uuid(),
   order_id uuid not null references public.orders (id) on delete cascade,
   product_id uuid references public.products (id) on delete set null,
+  product_name text,
   quantity integer not null,
   unit_price numeric not null,
   subtotal numeric not null
@@ -120,7 +121,7 @@ create table if not exists public.payments (
 );
 
 -- ---------------------------------------------------------------------
--- business_settings (singleton: datos de pago editables desde el admin)
+-- business_settings (singleton: configuración editable desde el admin)
 -- ---------------------------------------------------------------------
 create table if not exists public.business_settings (
   id smallint primary key default 1 check (id = 1),
@@ -128,10 +129,20 @@ create table if not exists public.business_settings (
   bancolombia_account text not null,
   bancolombia_holder text not null,
   whatsapp_number text not null default '573009999999',
+  shipping_origin_lat numeric not null default 10.859,
+  shipping_origin_lng numeric not null default -74.774,
+  shipping_origin_label text not null default 'DeliPasabocas, Malambo',
+  shipping_free_radius_km numeric not null default 10,
+  shipping_reference_cost numeric not null default 3500,
+  shipping_per_km numeric not null default 450,
+  shipping_max_cost numeric not null default 22000,
+  shipping_round_to numeric not null default 500,
   updated_at timestamptz default now()
 );
 
-insert into public.business_settings (id, nequi, bancolombia_account, bancolombia_holder, whatsapp_number)
+insert into public.business_settings (
+  id, nequi, bancolombia_account, bancolombia_holder, whatsapp_number
+)
 values (1, '3009999999', '123 456 78910', 'Deli Pasabocas', '573009999999')
 on conflict (id) do nothing;
 
@@ -250,6 +261,7 @@ declare
   v_order_number text;
   v_item jsonb;
   v_product_id uuid;
+  v_product_name text;
 begin
   loop
     v_order_number := 'DPB-' || lpad(((floor(random() * 900000) + 100000)::int)::text, 6, '0');
@@ -278,6 +290,7 @@ begin
     for v_item in select * from jsonb_array_elements(p_items)
     loop
       v_product_id := null;
+      v_product_name := nullif(trim(v_item->>'product_name'), '');
       begin
         if (v_item->>'product_id') is not null then
           v_product_id := (v_item->>'product_id')::uuid;
@@ -289,10 +302,20 @@ begin
         v_product_id := null;
       end;
 
-      insert into order_items (order_id, product_id, quantity, unit_price, subtotal)
+      if v_product_name is null and v_product_id is not null then
+        select trim(
+          p.name || coalesce(' · ' || nullif(trim(p.description), ''), '')
+        )
+        into v_product_name
+        from products p
+        where p.id = v_product_id;
+      end if;
+
+      insert into order_items (order_id, product_id, product_name, quantity, unit_price, subtotal)
       values (
         v_order_id,
         v_product_id,
+        v_product_name,
         coalesce((v_item->>'quantity')::int, 1),
         coalesce((v_item->>'unit_price')::numeric, 0),
         coalesce((v_item->>'subtotal')::numeric, 0)

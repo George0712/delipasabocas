@@ -13,8 +13,10 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { OrderStateService } from '../../core/services/order-state.service';
+import { ShippingService } from '../../core/services/shipping.service';
 import { CopPipe } from '../../shared/pipes/cop.pipe';
 import { FlowHeader } from '../../shared/components/flow-header/flow-header';
 import { DatePicker } from '../../shared/components/date-picker/date-picker';
@@ -80,10 +82,21 @@ import { whatsappDeliveryMessage } from '../../shared/utils/whatsapp-messages';
           <input
             type="text"
             formControlName="address"
-            placeholder="Barrio El Carmen, Malambo"
+            placeholder="Ej: Barrio El Carmen, Malambo"
             autocomplete="off"
             class="w-full rounded-xl border border-cream-200 bg-white px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
           />
+          @if (shippingLoading()) {
+            <p class="mt-1 text-[11px] text-gray-400">Calculando domicilio...</p>
+          } @else if (orderState.shippingLabel()) {
+            <p
+              class="mt-1 text-[11px] font-medium"
+              [class.text-brand-600]="orderState.shippingCost() === 0"
+              [class.text-gray-500]="orderState.shippingCost() > 0"
+            >
+              {{ orderState.shippingLabel() }}
+            </p>
+          }
         </label>
 
         <div class="grid grid-cols-2 gap-3">
@@ -132,9 +145,14 @@ import { whatsappDeliveryMessage } from '../../shared/utils/whatsapp-messages';
           <span>Subtotal</span>
           <span class="font-medium">{{ orderState.subtotal() | cop }}</span>
         </div>
-        <div class="flex justify-between text-gray-600">
-          <span>Domicilio</span>
-          <span class="font-medium">{{ orderState.shippingCost() | cop }}</span>
+        <div class="flex justify-between gap-3 text-gray-600">
+          <span class="min-w-0">
+            Domicilio
+            <span class="block text-[10px] font-normal text-gray-400">
+              {{ orderState.shippingLabel() }}
+            </span>
+          </span>
+          <span class="shrink-0 font-medium">{{ orderState.shippingCost() | cop }}</span>
         </div>
         <div class="flex justify-between text-base font-bold text-gray-900">
           <span>Total</span>
@@ -156,9 +174,11 @@ export class Delivery implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly shippingService = inject(ShippingService);
   protected readonly orderState = inject(OrderStateService);
 
   readonly selectedDate = signal('');
+  readonly shippingLoading = signal(false);
 
   readonly form = this.fb.nonNullable.group({
     customerName: ['', [Validators.required, Validators.minLength(3)]],
@@ -174,8 +194,17 @@ export class Delivery implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((date) => {
         this.selectedDate.set(date);
-        // Si cambia la fecha, revalidar que la hora elegida siga siendo válida.
         this.form.controls.deliveryTime.updateValueAndValidity();
+      });
+
+    this.form.controls.address.valueChanges
+      .pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((address) => {
+        void this.updateShipping(address);
       });
   }
 
@@ -187,6 +216,27 @@ export class Delivery implements OnInit {
     const existing = this.orderState.delivery();
     if (existing) {
       this.form.patchValue(existing);
+      void this.updateShipping(existing.address);
+    } else {
+      this.orderState.setShipping(0, 'Ingresa la dirección');
+    }
+  }
+
+  private async updateShipping(address: string): Promise<void> {
+    const trimmed = address.trim();
+    if (trimmed.length < 5) {
+      this.orderState.setShipping(0, 'Ingresa la dirección');
+      return;
+    }
+
+    this.shippingLoading.set(true);
+    try {
+      const quote = await this.shippingService.estimate(trimmed);
+      this.orderState.setShipping(quote.cost, quote.label);
+    } catch {
+      this.orderState.setShipping(0, 'No se pudo estimar el domicilio');
+    } finally {
+      this.shippingLoading.set(false);
     }
   }
 

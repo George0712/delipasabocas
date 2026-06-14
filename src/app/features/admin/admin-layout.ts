@@ -12,6 +12,7 @@ import {
 } from '@angular/router';
 
 import { AuthService } from '../../core/services/auth.service';
+import { PwaInstall } from '../../shared/components/pwa-install/pwa-install';
 
 interface NavItem {
   label: string;
@@ -22,7 +23,7 @@ interface NavItem {
 @Component({
   selector: 'app-admin-layout',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, PwaInstall],
   template: `
     <div class="flex min-h-screen bg-cream-100">
       @if (menuOpen()) {
@@ -142,6 +143,7 @@ interface NavItem {
           </div>
         </main>
       </div>
+      <app-pwa-install />
     </div>
   `,
 })

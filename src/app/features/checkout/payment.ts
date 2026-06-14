@@ -131,6 +131,7 @@ export class Payment implements OnInit {
     bancolombiaAccount: environment.business.bancolombiaAccount,
     bancolombiaHolder: environment.business.bancolombiaHolder,
     whatsappNumber: environment.whatsappNumber,
+    shipping: environment.business.shipping,
   });
   readonly methods: { id: PaymentMethod; label: string }[] = [
     { id: 'nequi', label: 'Nequi' },

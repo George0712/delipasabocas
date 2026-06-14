@@ -31,13 +31,15 @@ export class OrderStateService {
   private readonly _items = signal<OrderItem[]>([]);
   private readonly _delivery = signal<DeliveryInfo | null>(null);
   private readonly _paymentMethod = signal<PaymentMethod>('nequi');
-  private readonly _shippingCost = signal<number>(5000);
+  private readonly _shippingCost = signal<number>(0);
+  private readonly _shippingLabel = signal<string>('Según dirección');
   private readonly _confirmedOrder = signal<ConfirmedOrder | null>(null);
 
   readonly items = this._items.asReadonly();
   readonly delivery = this._delivery.asReadonly();
   readonly paymentMethod = this._paymentMethod.asReadonly();
   readonly shippingCost = this._shippingCost.asReadonly();
+  readonly shippingLabel = this._shippingLabel.asReadonly();
   readonly confirmedOrder = this._confirmedOrder.asReadonly();
 
   readonly subtotal = computed(() =>
@@ -70,6 +72,11 @@ export class OrderStateService {
     });
   }
 
+  setShipping(cost: number, label: string): void {
+    this._shippingCost.set(Math.max(0, cost));
+    this._shippingLabel.set(label);
+  }
+
   setDelivery(info: DeliveryInfo): void {
     this._delivery.set(info);
   }
@@ -91,12 +98,16 @@ export class OrderStateService {
     this._items.set([]);
     this._delivery.set(null);
     this._paymentMethod.set('nequi');
+    this._shippingCost.set(0);
+    this._shippingLabel.set('Según dirección');
   }
 
   reset(): void {
     this._items.set([]);
     this._delivery.set(null);
     this._paymentMethod.set('nequi');
+    this._shippingCost.set(0);
+    this._shippingLabel.set('Según dirección');
     this._confirmedOrder.set(null);
   }
 }

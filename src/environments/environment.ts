@@ -15,5 +15,18 @@ export const environment = {
     fryCostPerTray: 5000,
     /** Máximo de bandejas del mismo producto en pedido normal (home). */
     maxTraysPerProduct: 2,
+    /** Punto de producción y reglas de domicilio (Malambo = gratis). */
+    shipping: {
+      origin: {
+        lat: 10.859,
+        lng: -74.774,
+        label: 'DeliPasabocas, Malambo',
+      },
+      freeRadiusKm: 10,
+      malamboReferenceCost: 3500,
+      perKmBeyondFree: 450,
+      maxCost: 22000,
+      roundTo: 500,
+    },
   },
 };

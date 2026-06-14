@@ -55,27 +55,29 @@ import {
         <div
           class="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-brand-400 to-brand-500"
           [class.transition-all]="!dragging()"
-          [style.width.px]="offset() + 40"
+          [style.width.px]="offset() + thumbSize + trackPadding * 2"
         ></div>
 
         <span
-          class="pointer-events-none absolute inset-0 flex items-center justify-center pl-8 text-xs font-semibold text-brand-600"
+          class="pointer-events-none absolute inset-0 flex items-center justify-center pl-10 text-xs font-semibold text-brand-600"
           [style.opacity]="labelOpacity()"
         >
-          Desliza para: {{ nextLabel() }}
+          Pasar a {{ nextLabel() }}
         </span>
 
         <button
           type="button"
-          class="absolute top-1 left-1 flex h-9 w-9 items-center justify-center rounded-full bg-white text-brand-600 shadow-md"
+          class="absolute top-1 left-1 bottom-1 right-1 box-border flex h-9 w-9 items-center justify-center rounded-full"
           [class.transition-transform]="!dragging()"
           [style.transform]="'translateX(' + offset() + 'px)'"
           (pointerdown)="onPointerDown($event)"
           aria-label="Deslizar para avanzar el estado"
         >
-          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
+          <span
+            class="flex size-full items-center justify-center rounded-full bg-white text-brand-600"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevrons-right"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 7l5 5l-5 5" /><path d="M13 7l5 5l-5 5" /></svg>
+          </span>
         </button>
       </div>
     }
@@ -87,8 +89,10 @@ export class StatusSlider {
   readonly advance = output<OrderStatus>();
 
   private readonly track = viewChild<ElementRef<HTMLElement>>('track');
-  private readonly thumb = 36;
-  private readonly gap = 8;
+  /** Tamaño exterior del botón deslizable (h-9 / w-9). */
+  readonly thumbSize = 36;
+  /** Margen del botón respecto al borde de la pista (top-1 / left-1). */
+  readonly trackPadding = 4;
 
   readonly offset = signal(0);
   readonly dragging = signal(false);
@@ -136,7 +140,7 @@ export class StatusSlider {
     if (!el) {
       return;
     }
-    this.maxX = el.clientWidth - this.thumb - this.gap;
+    this.maxX = el.clientWidth - this.thumbSize - this.trackPadding * 2;
     this.startX = ev.clientX - this.offset();
     this.dragging.set(true);
     (ev.target as HTMLElement).setPointerCapture?.(ev.pointerId);

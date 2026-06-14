@@ -6,6 +6,7 @@ import {
   BusinessSettingsRow,
   mapBusinessSettingsRow,
 } from '../models/business-settings.model';
+import { ShippingConfig } from '../models/shipping.model';
 import { SupabaseService } from './supabase.service';
 
 const TABLE = 'business_settings';
@@ -15,25 +16,28 @@ const ROW_ID = 1;
 export class BusinessSettingsService {
   private readonly supabase = inject(SupabaseService);
 
-  /** Número de WhatsApp en uso (código país + celular, sin +). */
   readonly whatsappNumber = signal(environment.whatsappNumber);
+  readonly shippingConfig = signal<ShippingConfig>(
+    environment.business.shipping,
+  );
 
   constructor() {
     void this.get().then((settings) => this.applyToCache(settings));
   }
 
-  /** Valores por defecto del entorno si aún no hay fila en Supabase. */
   private fallback(): BusinessSettings {
     return {
       nequi: environment.business.nequi,
       bancolombiaAccount: environment.business.bancolombiaAccount,
       bancolombiaHolder: environment.business.bancolombiaHolder,
       whatsappNumber: environment.whatsappNumber,
+      shipping: environment.business.shipping,
     };
   }
 
   private applyToCache(settings: BusinessSettings): void {
     this.whatsappNumber.set(settings.whatsappNumber);
+    this.shippingConfig.set(settings.shipping);
   }
 
   private normalizeWhatsapp(value: string): string {
@@ -57,12 +61,21 @@ export class BusinessSettingsService {
   }
 
   async save(settings: BusinessSettings): Promise<BusinessSettings> {
+    const { shipping } = settings;
     const payload = {
       id: ROW_ID,
       nequi: settings.nequi.trim(),
       bancolombia_account: settings.bancolombiaAccount.trim(),
       bancolombia_holder: settings.bancolombiaHolder.trim(),
       whatsapp_number: this.normalizeWhatsapp(settings.whatsappNumber),
+      shipping_origin_lat: shipping.origin.lat,
+      shipping_origin_lng: shipping.origin.lng,
+      shipping_origin_label: shipping.origin.label.trim(),
+      shipping_free_radius_km: shipping.freeRadiusKm,
+      shipping_reference_cost: shipping.malamboReferenceCost,
+      shipping_per_km: shipping.perKmBeyondFree,
+      shipping_max_cost: shipping.maxCost,
+      shipping_round_to: shipping.roundTo,
       updated_at: new Date().toISOString(),
     };
 

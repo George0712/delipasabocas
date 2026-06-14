@@ -132,7 +132,7 @@ import { FlowHeader } from '../../shared/components/flow-header/flow-header';
             🔥
           </span>
           <div class="min-w-0 flex-1">
-            <p class="text-sm font-bold text-gray-900">¿Entregar fritas?</p>
+            <p class="text-sm font-bold text-gray-900">¿Entregar picadas fritas?</p>
             <p class="text-xs text-gray-500">
               {{ fryCostPerTray | cop }}/bandeja · {{ totalTrays() }}
               {{ totalTrays() === 1 ? 'bandeja' : 'bandejas' }}
@@ -172,7 +172,12 @@ import { FlowHeader } from '../../shared/components/flow-header/flow-header';
           </div>
         }
         <div class="flex justify-between text-gray-600">
-          <span>Domicilio (Malambo)</span>
+          <span>
+            Domicilio
+            <span class="block text-[10px] font-normal text-gray-400">
+              Se calcula con tu dirección
+            </span>
+          </span>
           <span class="font-medium">{{ shipping() | cop }}</span>
         </div>
         @if (totalTrays() > 0) {
@@ -180,7 +185,7 @@ import { FlowHeader } from '../../shared/components/flow-header/flow-header';
             class="flex justify-between text-gray-600"
             [class.invisible]="!fryEnabled()"
           >
-            <span>Fritas ({{ totalTrays() }} bandejas)</span>
+            <span>Picadas fritas ({{ totalTrays() }} bandejas)</span>
             <span class="font-medium tabular-nums">{{ potentialFryCost() | cop }}</span>
           </div>
         }
@@ -301,10 +306,11 @@ export class CustomOrder implements OnInit {
     }
 
     if (this.fryCost() > 0) {
+      const trays = this.totalTrays();
       items.push({
         productId: null,
-        productName: `Servicio fritas (${this.totalTrays()} bandejas)`,
-        quantity: this.totalTrays(),
+        productName: `Picadas fritas (${trays} ${trays === 1 ? 'bandeja' : 'bandejas'})`,
+        quantity: trays,
         unitPrice: this.fryCostPerTray,
         subtotal: this.fryCost(),
       });

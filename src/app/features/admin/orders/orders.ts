@@ -97,6 +97,44 @@ type Filter = OrderStatus | 'all';
               </span>
             </div>
 
+            @if (order.items.length > 0) {
+              <ul class="mt-3 space-y-1.5 border-t border-cream-100 pt-3">
+                @for (item of order.items; track item.id) {
+                  <li class="flex items-start justify-between gap-2 text-xs">
+                    <span class="min-w-0 flex-1 leading-snug text-gray-600">
+                      <span class="font-semibold text-gray-800">{{ item.quantity }}×</span>
+                      {{ item.productName }}
+                    </span>
+                    <span class="shrink-0 font-medium text-gray-700">
+                      {{ item.subtotal | cop }}
+                    </span>
+                  </li>
+                }
+              </ul>
+              <div class="mt-2 space-y-0.5 border-t border-dashed border-cream-100 pt-2 text-[11px] text-gray-400">
+                <div class="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>{{ order.subtotal | cop }}</span>
+                </div>
+                @if (order.shippingCost > 0) {
+                  <div class="flex justify-between">
+                    <span>Domicilio</span>
+                    <span>{{ order.shippingCost | cop }}</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="mt-3 border-t border-cream-100 pt-3 text-xs text-gray-400">
+                Sin detalle de productos.
+              </p>
+            }
+
+            @if (order.notes) {
+              <p class="mt-2 line-clamp-2 text-[11px] italic text-gray-400">
+                Nota: {{ order.notes }}
+              </p>
+            }
+
             <div class="mt-3 flex items-center justify-between border-t border-cream-100 pt-3">
               <p class="text-xs text-gray-400">
                 {{ order.deliveryDate | dateCo }} · {{ order.deliveryTime | timeCo }}

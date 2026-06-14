@@ -54,3 +54,56 @@ export function formatDateTimeCo(value: string | null | undefined): string {
   );
   return `${d}/${m}/${y} ${time}`;
 }
+
+const LEGACY_GENERIC_ITEM = 'Ítem personalizado';
+const FRY_SERVICE_PATTERN = /servicio\s*fritas|picadas?\s*fritas|^fritas\b/i;
+
+export interface OrderItemLabelInput {
+  productId: string | null;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+/** Detecta el cargo adicional por freír las bandejas del pedido. */
+export function isFryServiceItem(item: OrderItemLabelInput): boolean {
+  if (item.productId !== null) {
+    return false;
+  }
+
+  const name = item.productName?.trim() ?? '';
+  if (FRY_SERVICE_PATTERN.test(name)) {
+    return true;
+  }
+
+  if (name && name !== LEGACY_GENERIC_ITEM) {
+    return false;
+  }
+
+  // Pedidos antiguos sin nombre: precio unitario bajo típico del servicio de fritas.
+  return item.unitPrice > 0 && item.unitPrice <= 10000;
+}
+
+function fryServiceLabel(quantity: number): string {
+  const trays = quantity === 1 ? '1 bandeja' : `${quantity} bandejas`;
+  return `Picadas fritas (${trays})`;
+}
+
+/** Nombre legible del ítem para mostrar en el panel admin y resúmenes. */
+export function formatOrderItemName(item: OrderItemLabelInput): string {
+  const name = item.productName?.trim() ?? '';
+
+  if (isFryServiceItem(item)) {
+    return fryServiceLabel(item.quantity);
+  }
+
+  if (!name || name === LEGACY_GENERIC_ITEM) {
+    return 'Producto sin detalle';
+  }
+
+  if (FRY_SERVICE_PATTERN.test(name)) {
+    return fryServiceLabel(item.quantity);
+  }
+
+  return name;
+}
