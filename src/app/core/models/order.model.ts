@@ -59,15 +59,25 @@ export interface OrderStatusHistoryEntry {
   created_at: string;
 }
 
+export interface OrderTrackingItem {
+  productName: string;
+  quantity: number;
+  subtotal: number;
+}
+
 export interface OrderTracking {
   orderNumber: string;
   status: OrderStatus;
   customerName: string;
+  address: string;
   deliveryDate: string;
   deliveryTime: string;
+  subtotal: number;
+  shippingCost: number;
   total: number;
   createdAt: string;
   history: OrderStatusHistoryEntry[];
+  items: OrderTrackingItem[];
 }
 
 export interface OrderItem {

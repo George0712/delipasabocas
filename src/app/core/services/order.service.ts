@@ -127,22 +127,49 @@ export class OrderService {
       order_number: string;
       status: OrderStatus;
       customer_name: string;
+      address: string;
       delivery_date: string;
       delivery_time: string;
+      subtotal: number;
+      shipping_cost: number;
       total: number;
       created_at: string;
       history: { status: OrderStatus; created_at: string }[];
+      items: {
+        product_name: string | null;
+        product_id: string | null;
+        quantity: number;
+        unit_price: number;
+        subtotal: number;
+      }[];
     };
 
     return {
       orderNumber: row.order_number,
       status: row.status,
       customerName: row.customer_name,
+      address: row.address,
       deliveryDate: row.delivery_date,
       deliveryTime: row.delivery_time,
+      subtotal: Number(row.subtotal),
+      shippingCost: Number(row.shipping_cost),
       total: Number(row.total),
       createdAt: row.created_at,
       history: row.history ?? [],
+      items: (row.items ?? []).map((item) => {
+        const mapped = {
+          productId: item.product_id,
+          productName: item.product_name?.trim() || 'Ítem personalizado',
+          quantity: item.quantity,
+          unitPrice: Number(item.unit_price),
+          subtotal: Number(item.subtotal),
+        };
+        return {
+          productName: formatOrderItemName(mapped),
+          quantity: mapped.quantity,
+          subtotal: mapped.subtotal,
+        };
+      }),
     };
   }
 

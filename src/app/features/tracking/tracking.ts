@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   inject,
   input,
@@ -15,6 +16,7 @@ import {
   OrderStatus,
   OrderTracking,
 } from '../../core/models/order.model';
+import { OrderLiveService } from '../../core/services/order-live.service';
 import { OrderService } from '../../core/services/order.service';
 import { CopPipe } from '../../shared/pipes/cop.pipe';
 import { DateCoPipe } from '../../shared/pipes/date-co.pipe';
@@ -142,7 +144,40 @@ interface Step {
                 {{ t.deliveryTime | timeCo }}
               </dd>
             </div>
+            <div class="col-span-2">
+              <dt class="text-xs text-gray-400">Dirección de entrega</dt>
+              <dd class="font-medium leading-snug text-gray-800">{{ t.address }}</dd>
+            </div>
           </dl>
+
+          @if (t.items.length > 0) {
+            <div class="mt-4 border-t border-cream-100 pt-4">
+              <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Tu pedido
+              </p>
+              <ul class="space-y-2">
+                @for (item of t.items; track $index) {
+                  <li class="flex items-start justify-between gap-2 text-sm">
+                    <span class="min-w-0 flex-1 leading-snug text-gray-700">
+                      <span class="font-semibold text-gray-900">{{ item.quantity }}×</span>
+                      {{ item.productName }}
+                    </span>
+                    <span class="shrink-0 font-medium text-gray-800">
+                      {{ item.subtotal | cop }}
+                    </span>
+                  </li>
+                }
+              </ul>
+              @if (t.shippingCost > 0) {
+                <div
+                  class="mt-2 flex justify-between border-t border-dashed border-cream-100 pt-2 text-xs text-gray-500"
+                >
+                  <span>Domicilio</span>
+                  <span>{{ t.shippingCost | cop }}</span>
+                </div>
+              }
+            </div>
+          }
         </div>
 
         @if (t.status === 'cancelled') {
@@ -221,7 +256,11 @@ interface Step {
 })
 export class Tracking {
   private readonly orderService = inject(OrderService);
+  private readonly orderLive = inject(OrderLiveService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+
+  private stopPolling: (() => void) | null = null;
 
   /** Bind al parámetro de ruta :orderNumber (withComponentInputBinding). */
   readonly orderNumber = input<string>('');
@@ -264,6 +303,26 @@ export class Tracking {
         void this.load(number);
       }
     });
+
+    effect(() => {
+      const activeNumber =
+        this.tracking()?.orderNumber ??
+        (this.query().trim().toUpperCase() ||
+          this.orderNumber().trim().toUpperCase());
+
+      this.stopPolling?.();
+      this.stopPolling = null;
+
+      if (!this.tracking() || !activeNumber) {
+        return;
+      }
+
+      this.stopPolling = this.orderLive.watchOrderTracking(activeNumber, () => {
+        void this.refresh(activeNumber);
+      });
+    });
+
+    this.destroyRef.onDestroy(() => this.stopPolling?.());
   }
 
   onInput(event: Event): void {
@@ -274,6 +333,19 @@ export class Tracking {
     const number = this.query().trim().toUpperCase();
     if (number) {
       this.router.navigate(['/seguimiento', number]);
+    }
+  }
+
+  private async refresh(orderNumber: string): Promise<void> {
+    try {
+      const result = await this.orderService.getStatusByNumber(orderNumber);
+      if (result) {
+        this.tracking.set(result);
+        this.notFound.set(false);
+        this.loadError.set(false);
+      }
+    } catch {
+      /* Ignora fallos puntuales del polling en segundo plano. */
     }
   }
 

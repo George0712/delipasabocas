@@ -207,6 +207,22 @@ create policy "admin_insert_business_settings" on public.business_settings
   for insert to authenticated with check (is_admin());
 
 -- ---------------------------------------------------------------------
+-- Realtime: pedidos en vivo para el panel admin (requiere sesión admin).
+-- ---------------------------------------------------------------------
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'orders'
+  ) then
+    alter publication supabase_realtime add table public.orders;
+  end if;
+end $$;
+
+-- ---------------------------------------------------------------------
 -- get_order_status: seguimiento público de un pedido por su número.
 -- SECURITY DEFINER para exponer solo campos seguros + historial sin
 -- abrir SELECT sobre toda la tabla orders al rol anónimo.
@@ -221,8 +237,11 @@ as $$
     'order_number', o.order_number,
     'status', o.status,
     'customer_name', o.customer_name,
+    'address', o.address,
     'delivery_date', o.delivery_date,
     'delivery_time', o.delivery_time,
+    'subtotal', o.subtotal,
+    'shipping_cost', o.shipping_cost,
     'total', o.total,
     'created_at', o.created_at,
     'history', coalesce((
@@ -231,6 +250,20 @@ as $$
         order by sh.created_at
       )
       from status_history sh where sh.order_id = o.id
+    ), '[]'::json),
+    'items', coalesce((
+      select json_agg(
+        json_build_object(
+          'product_id', oi.product_id,
+          'product_name', oi.product_name,
+          'quantity', oi.quantity,
+          'unit_price', oi.unit_price,
+          'subtotal', oi.subtotal
+        )
+        order by oi.subtotal desc
+      )
+      from order_items oi
+      where oi.order_id = o.id
     ), '[]'::json)
   )
   from orders o

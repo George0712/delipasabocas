@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   inject,
   OnInit,
   signal,
@@ -12,6 +13,7 @@ import {
   OrderStatus,
   ORDER_STATUS_LABELS,
 } from '../../../core/models/order.model';
+import { AdminOrderNotifyService } from '../../../core/services/admin-order-notify.service';
 import { OrderService } from '../../../core/services/order.service';
 import { StatusSlider } from '../../../shared/components/status-slider/status-slider';
 import { CopPipe } from '../../../shared/pipes/cop.pipe';
@@ -91,6 +93,10 @@ type Filter = OrderStatus | 'all';
                   #{{ order.orderNumber }}
                 </p>
                 <p class="truncate text-sm text-gray-600">{{ order.customerName }}</p>
+                <p class="mt-1 line-clamp-2 text-xs leading-snug text-gray-500">
+                  <span class="font-medium text-gray-400">Dirección:</span>
+                  {{ order.address }}
+                </p>
               </div>
               <span [class]="badgeClass(order.status)">
                 {{ statusLabels[order.status] }}
@@ -165,6 +171,8 @@ type Filter = OrderStatus | 'all';
 })
 export class Orders implements OnInit {
   private readonly orderService = inject(OrderService);
+  private readonly orderNotify = inject(AdminOrderNotifyService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly statusLabels = ORDER_STATUS_LABELS;
   readonly statusOptions = Object.keys(ORDER_STATUS_LABELS) as OrderStatus[];
@@ -207,6 +215,19 @@ export class Orders implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await this.load();
+
+    const stopLive = this.orderNotify.onChange(() => {
+      void this.refreshSilently();
+    });
+    this.destroyRef.onDestroy(stopLive);
+  }
+
+  async refreshSilently(): Promise<void> {
+    try {
+      this.orders.set(await this.orderService.list());
+    } catch {
+      /* Mantiene la lista actual si falla la actualización en segundo plano. */
+    }
   }
 
   async load(): Promise<void> {

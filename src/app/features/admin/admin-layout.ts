@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   inject,
   signal,
 } from '@angular/core';
@@ -12,7 +13,9 @@ import {
 } from '@angular/router';
 
 import { AuthService } from '../../core/services/auth.service';
+import { AdminOrderNotifyService } from '../../core/services/admin-order-notify.service';
 import { PwaInstall } from '../../shared/components/pwa-install/pwa-install';
+import { AdminOrderAlert } from '../../shared/components/admin-order-alert/admin-order-alert';
 
 interface NavItem {
   label: string;
@@ -23,7 +26,7 @@ interface NavItem {
 @Component({
   selector: 'app-admin-layout',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, PwaInstall],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, PwaInstall, AdminOrderAlert],
   template: `
     <div class="flex min-h-screen bg-cream-100">
       @if (menuOpen()) {
@@ -143,6 +146,7 @@ interface NavItem {
           </div>
         </main>
       </div>
+      <app-admin-order-alert />
       <app-pwa-install />
     </div>
   `,
@@ -150,8 +154,15 @@ interface NavItem {
 export class AdminLayout {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly orderNotify = inject(AdminOrderNotifyService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly menuOpen = signal(false);
+
+  constructor() {
+    this.orderNotify.ensureListening();
+    this.destroyRef.onDestroy(() => this.orderNotify.stopListening());
+  }
 
   readonly nav: NavItem[] = [
     { label: 'Dashboard', path: 'dashboard', icon: 'dashboard' },
