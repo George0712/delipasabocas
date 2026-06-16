@@ -36,6 +36,7 @@ import { whatsappDeliveryMessage } from '../../shared/utils/whatsapp-messages';
     WhatsappButton,
   ],
   template: `
+    <div class="app-shell app-page">
     <app-flow-header title="Información de entrega" />
 
     <form
@@ -44,56 +45,26 @@ import { whatsappDeliveryMessage } from '../../shared/utils/whatsapp-messages';
       autocomplete="off"
       class="px-4 pb-44 pt-2"
     >
-      <h2 class="mb-4 text-base font-semibold text-gray-800">
-        3. Datos de entrega
-      </h2>
+      <h2 class="app-heading mb-4">3. Datos de entrega</h2>
 
       <div class="space-y-4">
         <label class="block">
-          <span class="mb-1 block text-xs font-medium text-gray-500">
-            Nombre completo
-          </span>
-          <input
-            type="text"
-            formControlName="customerName"
-            placeholder="María López"
-            autocomplete="off"
-            class="w-full rounded-xl border border-cream-200 bg-white px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-          />
+          <span class="app-label">Nombre completo</span>
+          <input type="text" formControlName="customerName" placeholder="María López" autocomplete="off" class="app-input" />
         </label>
 
         <label class="block">
-          <span class="mb-1 block text-xs font-medium text-gray-500">
-            Teléfono / WhatsApp
-          </span>
-          <input
-            type="tel"
-            formControlName="customerPhone"
-            placeholder="300 123 4567"
-            autocomplete="off"
-            class="w-full rounded-xl border border-cream-200 bg-white px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-          />
+          <span class="app-label">Teléfono / WhatsApp</span>
+          <input type="tel" formControlName="customerPhone" placeholder="300 123 4567" autocomplete="off" class="app-input" />
         </label>
 
         <label class="block">
-          <span class="mb-1 block text-xs font-medium text-gray-500">
-            Dirección de entrega
-          </span>
-          <input
-            type="text"
-            formControlName="address"
-            placeholder="Ej: Barrio El Carmen, Malambo"
-            autocomplete="off"
-            class="w-full rounded-xl border border-cream-200 bg-white px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-          />
+          <span class="app-label">Dirección de entrega</span>
+          <input type="text" formControlName="address" placeholder="Ej: Barrio El Carmen, Malambo" autocomplete="off" class="app-input" />
           @if (shippingLoading()) {
-            <p class="mt-1 text-[11px] text-gray-400">Calculando domicilio...</p>
+            <p class="app-text-muted mt-1 text-[11px]">Calculando domicilio...</p>
           } @else if (orderState.shippingLabel()) {
-            <p
-              class="mt-1 text-[11px] font-medium"
-              [class.text-brand-600]="orderState.shippingCost() === 0"
-              [class.text-gray-500]="orderState.shippingCost() > 0"
-            >
+            <p class="mt-1 text-[11px] font-medium" [class.text-[var(--app-primary)]]="orderState.shippingCost() === 0" [class.app-text-muted]="orderState.shippingCost() > 0">
               {{ orderState.shippingLabel() }}
             </p>
           }
@@ -101,75 +72,45 @@ import { whatsappDeliveryMessage } from '../../shared/utils/whatsapp-messages';
 
         <div class="grid grid-cols-2 gap-3">
           <div class="relative">
-            <span class="mb-1 block text-xs font-medium text-gray-500">
-              Fecha de entrega
-            </span>
+            <span class="app-label">Fecha de entrega</span>
             <app-date-picker formControlName="deliveryDate" />
           </div>
           <div class="relative">
-            <span class="mb-1 block text-xs font-medium text-gray-500">
-              Hora aproximada
-            </span>
-            <app-time-picker
-              formControlName="deliveryTime"
-              [minDate]="selectedDate()"
-            />
+            <span class="app-label">Hora aproximada</span>
+            <app-time-picker formControlName="deliveryTime" [minDate]="selectedDate()" />
           </div>
         </div>
 
         <label class="block">
-          <span class="mb-1 block text-xs font-medium text-gray-500">
-            Observaciones (opcional)
-          </span>
-          <textarea
-            formControlName="notes"
-            rows="2"
-            placeholder="Punto de referencia, color de la casa..."
-            autocomplete="off"
-            class="w-full rounded-xl border border-cream-200 bg-white px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-          ></textarea>
+          <span class="app-label">Observaciones (opcional)</span>
+          <textarea formControlName="notes" rows="2" placeholder="Punto de referencia, color de la casa..." autocomplete="off" class="app-input"></textarea>
         </label>
       </div>
     </form>
 
-    <footer
-      class="fixed inset-x-0 bottom-0 space-y-3 border-t border-cream-200 bg-cream-50/95 p-4 backdrop-blur"
-    >
-      <app-whatsapp-button
-        class="absolute bottom-full right-4 mb-3"
-        variant="icon"
-        [message]="whatsappMessage()"
-      />
+    <footer class="app-footer-bar">
+      <app-whatsapp-button class="absolute bottom-full right-4 mb-3" variant="icon" [message]="whatsappMessage()" />
       <div class="space-y-1 text-sm">
-        <div class="flex justify-between text-gray-600">
+        <div class="app-text-secondary flex justify-between">
           <span>Subtotal</span>
           <span class="font-medium">{{ orderState.subtotal() | cop }}</span>
         </div>
-        <div class="flex justify-between gap-3 text-gray-600">
+        <div class="app-text-secondary flex justify-between gap-3">
           <span class="min-w-0">
             Domicilio
-            <span class="block text-[10px] font-normal text-gray-400">
-              {{ orderState.shippingLabel() }}
-            </span>
+            <span class="app-text-muted block text-[10px] font-normal">{{ orderState.shippingLabel() }}</span>
           </span>
           <span class="shrink-0 font-medium">{{ orderState.shippingCost() | cop }}</span>
         </div>
-        <div class="flex justify-between text-base font-bold text-gray-900">
+        <div class="app-text flex justify-between text-base font-bold">
           <span>Total</span>
           <span>{{ orderState.total() | cop }}</span>
         </div>
       </div>
-      <button
-        type="button"
-        [disabled]="form.invalid"
-        (click)="submit()"
-        class="w-full rounded-xl bg-brand-500 py-3.5 text-sm font-semibold text-white shadow-md transition enabled:hover:bg-brand-600 disabled:opacity-40"
-      >
-        Continuar
-      </button>
+      <button type="button" [disabled]="form.invalid" (click)="submit()" class="app-btn-primary w-full">Continuar</button>
     </footer>
-  `,
-})
+    </div>
+  `,})
 export class Delivery implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);

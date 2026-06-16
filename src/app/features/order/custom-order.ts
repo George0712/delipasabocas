@@ -23,60 +23,44 @@ import { FlowHeader } from '../../shared/components/flow-header/flow-header';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CopPipe, FlowHeader],
   template: `
+    <div class="app-shell app-page">
     <app-flow-header title="Pedido personalizado" />
 
     <main class="px-4 pb-56 pt-2">
-      <p class="mb-4 text-sm text-gray-500">
-        Combos con pedido mínimo y mejor precio para tu evento.
-      </p>
 
       @if (combos().length > 0) {
-        <h2 class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-          Combos para eventos
-        </h2>
+        <h2 class="app-eyebrow mb-2">Combos para eventos</h2>
         <div class="space-y-3">
           @for (combo of combos(); track combo.id) {
-            <div
-              class="flex h-full flex-col rounded-2xl border bg-white p-4 shadow-sm transition"
-              [class.border-brand-500]="quantityOf(combo.id) > 0"
-              [class.ring-2]="quantityOf(combo.id) > 0"
-              [class.ring-brand-200]="quantityOf(combo.id) > 0"
-              [class.border-cream-200]="quantityOf(combo.id) === 0"
-            >
+            <div class="app-card flex h-full flex-col p-4 transition" [class.app-card-selected]="quantityOf(combo.id) > 0">
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2">
-                  <p class="text-sm font-bold text-gray-900">{{ combo.name }}</p>
+                  <p class="app-text text-sm font-bold">{{ combo.name }}</p>
                   @if (savingsOf(combo) > 0) {
-                    <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                      Ahorras {{ savingsOf(combo) | cop }}
-                    </span>
+                    <span class="rounded-full bg-[#ecfdf5] px-2 py-0.5 text-[10px] font-semibold text-[#047857]">Ahorras {{ savingsOf(combo) | cop }}</span>
                   }
                 </div>
-                <p class="mt-0.5 text-xs text-gray-500">{{ combo.description }}</p>
+                <p class="app-text-muted mt-0.5 text-xs">{{ combo.description }}</p>
                 <div class="mt-2 flex items-baseline gap-2">
-                  <span class="text-base font-bold text-brand-500">{{ combo.price | cop }}</span>
+                  <span class="app-text-primary text-base font-bold">{{ combo.price | cop }}</span>
                   @if (combo.referencePrice && combo.referencePrice > combo.price) {
-                    <span class="text-xs text-gray-400 line-through">
-                      {{ combo.referencePrice | cop }}
-                    </span>
+                    <span class="app-text-muted text-xs line-through">{{ combo.referencePrice | cop }}</span>
                   }
                 </div>
               </div>
 
               <div class="mt-auto min-h-10 pt-3">
                 @if (quantityOf(combo.id) === 0) {
-                  <button
-                    type="button"
-                    (click)="increment(combo.id)"
-                    class="flex h-10 w-full items-center justify-center gap-1 rounded-xl border border-brand-200 bg-brand-50 text-sm font-semibold text-brand-600 transition active:scale-95"
-                  >
-                    Agregar combo
-                  </button>
+                  <button type="button" (click)="increment(combo.id)" class="app-btn-soft flex h-10 w-full items-center justify-center">Agregar combo</button>
                 } @else {
-                  <div class="flex h-10 items-center justify-between rounded-xl bg-brand-500 px-1.5 text-white">
-                    <button type="button" (click)="decrement(combo.id)" class="grid h-8 w-8 place-items-center rounded-lg bg-white/15">−</button>
-                    <span class="text-sm font-bold">{{ quantityOf(combo.id) }}</span>
-                    <button type="button" (click)="increment(combo.id)" class="grid h-8 w-8 place-items-center rounded-lg bg-white/15">+</button>
+                  <div class="flex h-10 items-center justify-between rounded-xl bg-[var(--app-primary)] px-1.5 text-white">
+                    <button type="button" (click)="decrement(combo.id)" aria-label="Quitar uno" class="grid h-7 w-7 place-items-center rounded-lg bg-white/15">
+                      <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14" /></svg>
+                    </button>
+                    <span class="min-w-[1.25rem] text-center text-sm font-bold tabular-nums">{{ quantityOf(combo.id) }}</span>
+                    <button type="button" (click)="increment(combo.id)" aria-label="Agregar uno" class="grid h-7 w-7 place-items-center rounded-lg bg-white/15">
+                      <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                    </button>
                   </div>
                 }
               </div>
@@ -86,21 +70,23 @@ import { FlowHeader } from '../../shared/components/flow-header/flow-header';
       }
 
       @if (trays().length > 0) {
-        <h2 class="mb-2 mt-6 text-xs font-semibold uppercase tracking-wide text-gray-400">
-          O arma tu pedido
-        </h2>
+        <h2 class="app-eyebrow mb-2 mt-6">O arma tu pedido</h2>
         <div class="space-y-3">
           @for (product of trays(); track product.id) {
-            <div class="flex items-center justify-between rounded-2xl border border-cream-200 bg-white p-4 shadow-sm">
+            <div class="app-card flex items-center justify-between p-4">
               <div class="pr-3">
-                <p class="text-sm font-semibold text-gray-800">{{ product.name }}</p>
-                <p class="text-xs text-gray-500">{{ product.description }}</p>
-                <p class="mt-1 text-sm font-bold text-brand-500">{{ product.price | cop }}</p>
+                <p class="app-text text-sm font-semibold">{{ product.name }}</p>
+                <p class="app-text-muted text-xs">{{ product.description }}</p>
+                <p class="app-text-primary mt-1 text-sm font-bold">{{ product.price | cop }}</p>
               </div>
-              <div class="flex items-center gap-3">
-                <button type="button" (click)="decrement(product.id)" class="grid h-8 w-8 place-items-center rounded-full border border-cream-200 text-lg text-gray-600">−</button>
-                <span class="w-8 text-center text-sm font-semibold">{{ quantityOf(product.id) }}</span>
-                <button type="button" (click)="increment(product.id)" class="grid h-8 w-8 place-items-center rounded-full bg-brand-500 text-lg text-white">+</button>
+              <div class="flex shrink-0 items-center gap-2">
+                <button type="button" (click)="decrement(product.id)" aria-label="Quitar uno" class="grid h-8 w-8 place-items-center rounded-full border" [style.border-color]="'var(--app-border)'" [style.color]="'var(--app-text-secondary)'">
+                  <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14" /></svg>
+                </button>
+                <span class="w-6 text-center text-sm font-semibold tabular-nums">{{ quantityOf(product.id) }}</span>
+                <button type="button" (click)="increment(product.id)" aria-label="Agregar uno" class="grid h-8 w-8 place-items-center rounded-full bg-[var(--app-primary)] text-white">
+                  <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                </button>
               </div>
             </div>
           }
@@ -108,101 +94,46 @@ import { FlowHeader } from '../../shared/components/flow-header/flow-header';
       }
     </main>
 
-    <footer class="fixed inset-x-0 bottom-0 z-20 space-y-3 border-t border-cream-200 bg-cream-50/95 p-4 backdrop-blur">
+    <footer class="app-footer-bar z-20">
       @if (totalTrays() > 0) {
-        <button
-          type="button"
-          (click)="toggleFryDirect()"
-          class="flex w-full items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left shadow-md transition active:scale-[0.99]"
-          [class.border-amber-400]="fryEnabled()"
-          [class.bg-gradient-to-r]="fryEnabled()"
-          [class.from-amber-100]="fryEnabled()"
-          [class.to-orange-50]="fryEnabled()"
-          [class.border-amber-200]="!fryEnabled()"
-          [class.bg-white]="!fryEnabled()"
-          [class.ring-2]="!fryEnabled()"
-          [class.ring-amber-100]="!fryEnabled()"
-        >
-          <span
-            class="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-lg"
-            [class.bg-amber-400]="fryEnabled()"
-            [class.text-white]="fryEnabled()"
-            [class.bg-amber-50]="!fryEnabled()"
-          >
-            🔥
-          </span>
+        <button type="button" (click)="toggleFryDirect()" class="app-card flex w-full items-center gap-3 px-4 py-3 text-left transition active:scale-[0.99]" [class.app-card-selected]="fryEnabled()">
+          <span class="app-surface-inset grid h-10 w-10 shrink-0 place-items-center rounded-xl text-lg">🔥</span>
           <div class="min-w-0 flex-1">
-            <p class="text-sm font-bold text-gray-900">¿Entregar picadas fritas?</p>
-            <p class="text-xs text-gray-500">
-              {{ fryCostPerTray | cop }}/bandeja · {{ totalTrays() }}
-              {{ totalTrays() === 1 ? 'bandeja' : 'bandejas' }}
-            </p>
+            <p class="app-text text-sm font-bold">¿Entregar picadas fritas?</p>
+            <p class="app-text-muted text-xs">{{ fryCostPerTray | cop }}/bandeja · {{ totalTrays() }} {{ totalTrays() === 1 ? 'bandeja' : 'bandejas' }}</p>
           </div>
-          <span
-            class="w-[4.5rem] shrink-0 text-right text-xs font-semibold tabular-nums text-amber-700"
-            [class.invisible]="!fryEnabled()"
-          >
-            +{{ potentialFryCost() | cop }}
-          </span>
-          <span
-            class="relative h-7 w-12 shrink-0 rounded-full transition-colors"
-            [class.bg-amber-400]="fryEnabled()"
-            [class.bg-gray-200]="!fryEnabled()"
-          >
-            <span
-              class="absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform"
-              [class.translate-x-5]="fryEnabled()"
-              [class.translate-x-0.5]="!fryEnabled()"
-            ></span>
+          <span class="app-text-primary w-[4.5rem] shrink-0 text-right text-xs font-semibold tabular-nums" [class.invisible]="!fryEnabled()">+{{ potentialFryCost() | cop }}</span>
+          <span class="relative h-7 w-12 shrink-0 rounded-full transition-colors" [style.background]="fryEnabled() ? 'var(--app-primary)' : 'var(--app-border)'">
+            <span class="absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform" [class.translate-x-5]="fryEnabled()" [class.translate-x-0.5]="!fryEnabled()"></span>
           </span>
         </button>
       }
 
       <div class="space-y-1 text-sm">
         @if (combosSubtotal() > 0) {
-          <div class="flex justify-between text-gray-600">
-            <span>Combos</span>
-            <span class="font-medium">{{ combosSubtotal() | cop }}</span>
-          </div>
+          <div class="app-text-secondary flex justify-between"><span>Combos</span><span class="font-medium">{{ combosSubtotal() | cop }}</span></div>
         }
         @if (traysSubtotal() > 0) {
-          <div class="flex justify-between text-gray-600">
-            <span>Bandejas sueltas</span>
-            <span class="font-medium">{{ traysSubtotal() | cop }}</span>
-          </div>
+          <div class="app-text-secondary flex justify-between"><span>Bandejas sueltas</span><span class="font-medium">{{ traysSubtotal() | cop }}</span></div>
         }
-        <div class="flex justify-between text-gray-600">
-          <span>
-            Domicilio
-            <span class="block text-[10px] font-normal text-gray-400">
-              Se calcula con tu dirección
-            </span>
-          </span>
+        <div class="app-text-secondary flex justify-between">
+          <span>Domicilio <span class="app-text-muted block text-[10px] font-normal">Se calcula con tu dirección</span></span>
           <span class="font-medium">{{ shipping() | cop }}</span>
         </div>
         @if (totalTrays() > 0) {
-          <div
-            class="flex justify-between text-gray-600"
-            [class.invisible]="!fryEnabled()"
-          >
+          <div class="app-text-secondary flex justify-between" [class.invisible]="!fryEnabled()">
             <span>Picadas fritas ({{ totalTrays() }} bandejas)</span>
             <span class="font-medium tabular-nums">{{ potentialFryCost() | cop }}</span>
           </div>
         }
-        <div class="flex justify-between text-base font-bold text-gray-900">
+        <div class="app-text flex justify-between text-base font-bold">
           <span>Total estimado</span>
           <span>{{ total() | cop }}</span>
         </div>
       </div>
-      <button
-        type="button"
-        [disabled]="!hasSelection()"
-        (click)="continue()"
-        class="w-full rounded-xl bg-brand-500 py-3.5 text-sm font-semibold text-white shadow-md transition enabled:hover:bg-brand-600 disabled:opacity-40"
-      >
-        Continuar
-      </button>
+      <button type="button" [disabled]="!hasSelection()" (click)="continue()" class="app-btn-primary w-full">Continuar</button>
     </footer>
+    </div>
   `,
 })
 export class CustomOrder implements OnInit {

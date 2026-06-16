@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@import './app/features/client/client-theme.css';
+@import './app/features/admin/admin-theme.css';
 
 /* Paleta de marca DeliPasabocas */
 @theme {
@@ -33,8 +35,8 @@ body {
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background-color: var(--color-cream-50);
-  color: #1f2937;
+  background-color: var(--app-bg);
+  color: var(--app-text);
   -webkit-font-smoothing: antialiased;
 }
 

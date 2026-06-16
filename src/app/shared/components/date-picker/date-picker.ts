@@ -36,45 +36,27 @@ const MONTHS = [
       type="button"
       (click)="toggle()"
       [disabled]="disabled()"
-      class="flex w-full items-center justify-between rounded-xl border border-cream-200 bg-white px-3 py-2.5 text-left text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 disabled:opacity-50"
+      class="app-input flex w-full items-center justify-between text-left disabled:opacity-50"
     >
-      <span [class.text-gray-400]="!value()">
+      <span [class.app-text-muted]="!value()">
         {{ value() ? displayDate() : 'Selecciona la fecha' }}
       </span>
-      <svg viewBox="0 0 24 24" class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2">
+      <svg viewBox="0 0 24 24" class="app-text-muted h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="3" y="4" width="18" height="18" rx="2" />
         <path stroke-linecap="round" d="M3 9h18M8 2v4M16 2v4" />
       </svg>
     </button>
 
     @if (open()) {
-      <div class="fixed inset-0 z-40" (click)="close()"></div>
-      <div
-        class="absolute z-50 mt-2 w-72 rounded-2xl border border-cream-200 bg-white p-4 shadow-xl"
-      >
+      <div class="app-modal-overlay" (click)="close()"></div>
+      <div class="app-popover">
         <div class="mb-3 flex items-center justify-between">
-          <button
-            type="button"
-            (click)="prevMonth()"
-            class="grid h-8 w-8 place-items-center rounded-full text-gray-500 hover:bg-cream-100"
-            aria-label="Mes anterior"
-          >
-            ‹
-          </button>
-          <span class="text-sm font-semibold capitalize text-gray-800">
-            {{ monthName() }} {{ viewYear() }}
-          </span>
-          <button
-            type="button"
-            (click)="nextMonth()"
-            class="grid h-8 w-8 place-items-center rounded-full text-gray-500 hover:bg-cream-100"
-            aria-label="Mes siguiente"
-          >
-            ›
-          </button>
+          <button type="button" (click)="prevMonth()" class="grid h-8 w-8 place-items-center rounded-full app-text-muted transition hover:bg-[var(--app-bg-subtle)]" aria-label="Mes anterior">‹</button>
+          <span class="app-text text-sm font-semibold capitalize">{{ monthName() }} {{ viewYear() }}</span>
+          <button type="button" (click)="nextMonth()" class="grid h-8 w-8 place-items-center rounded-full app-text-muted transition hover:bg-[var(--app-bg-subtle)]" aria-label="Mes siguiente">›</button>
         </div>
 
-        <div class="mb-1 grid grid-cols-7 text-center text-xs font-medium text-gray-400">
+        <div class="app-text-muted mb-1 grid grid-cols-7 text-center text-xs font-medium">
           @for (wd of weekdays; track wd) {
             <span>{{ wd }}</span>
           }
@@ -90,13 +72,13 @@ const MONTHS = [
               [disabled]="cell.disabled"
               (click)="pick(cell)"
               class="grid h-9 w-9 place-items-center rounded-full text-sm transition"
-              [class.bg-brand-500]="cell.iso === value()"
+              [style.background]="cell.iso === value() ? 'var(--app-primary)' : null"
               [class.text-white]="cell.iso === value()"
               [class.font-bold]="cell.isToday"
-              [class.text-brand-500]="cell.isToday && cell.iso !== value()"
-              [class.text-gray-700]="!cell.isToday && cell.iso !== value()"
+              [class.app-text-primary]="cell.isToday && cell.iso !== value()"
+              [class.app-text-secondary]="!cell.isToday && cell.iso !== value()"
               [class.opacity-30]="cell.disabled"
-              [class.hover:bg-cream-100]="!cell.disabled && cell.iso !== value()"
+              [class.hover:bg-\[var\(--app-bg-subtle\)\]]="!cell.disabled && cell.iso !== value()"
             >
               {{ cell.day }}
             </button>

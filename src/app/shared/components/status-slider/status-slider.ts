@@ -28,11 +28,9 @@ import {
   template: `
     @if (isTerminal()) {
       <div
-        class="flex h-11 items-center justify-center gap-2 rounded-full text-sm font-semibold"
-        [class.bg-emerald-50]="status() === 'delivered'"
-        [class.text-emerald-700]="status() === 'delivered'"
-        [class.bg-gray-100]="status() === 'cancelled'"
-        [class.text-gray-500]="status() === 'cancelled'"
+        class="adm-slider-terminal"
+        [class.adm-slider-terminal-success]="status() === 'delivered'"
+        [class.adm-slider-terminal-muted]="status() === 'cancelled'"
       >
         @if (status() === 'delivered') {
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -46,37 +44,71 @@ import {
     } @else if (nextStatus()) {
       <div
         #track
-        class="relative h-11 w-full touch-none select-none overflow-hidden rounded-full border border-brand-100 bg-cream-100"
+        class="adm-slider-track relative h-12 w-full touch-none select-none overflow-hidden rounded-full"
+        [class.adm-slider-dragging]="dragging()"
         (pointermove)="onPointerMove($event)"
         (pointerup)="onPointerUp()"
         (pointercancel)="onPointerUp()"
         (pointerleave)="onPointerUp()"
       >
         <div
-          class="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-brand-400 to-brand-500"
+          class="adm-slider-fill absolute inset-y-0 left-0 z-[1] overflow-hidden rounded-full"
           [class.transition-all]="!dragging()"
-          [style.width.px]="offset() + thumbSize + trackPadding * 2"
-        ></div>
+          [class.duration-300]="!dragging()"
+          [style.width.px]="fillEnd()"
+        >
+          @if (dragging()) {
+            <div class="adm-slider-fill-pulse" aria-hidden="true"></div>
+            <div
+              class="adm-slider-fill-cues"
+              [style.opacity]="cuesOpacity()"
+              aria-hidden="true"
+            >
+              <div class="adm-slider-cues">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 8l4 4-4 4" />
+                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 8l4 4-4 4" />
+                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 8l4 4-4 4" />
+                </svg>
+              </div>
+            </div>
+          }
+        </div>
 
         <span
-          class="pointer-events-none absolute inset-0 flex items-center justify-center pl-10 text-xs font-semibold text-brand-600"
-          [style.opacity]="labelOpacity()"
+          class="adm-slider-label pointer-events-none absolute inset-y-0 z-[1] flex items-center truncate pr-4"
+          [style.left.px]="fillEnd() + 12"
         >
           Pasar a {{ nextLabel() }}
         </span>
 
         <button
           type="button"
-          class="absolute top-1 left-1 bottom-1 right-1 box-border flex h-9 w-9 items-center justify-center rounded-full"
+          class="absolute top-1 left-1 bottom-1 right-1 z-[2] box-border flex h-10 w-10 items-center justify-center rounded-full"
           [class.transition-transform]="!dragging()"
+          [class.duration-300]="!dragging()"
           [style.transform]="'translateX(' + offset() + 'px)'"
           (pointerdown)="onPointerDown($event)"
           aria-label="Deslizar para avanzar el estado"
         >
-          <span
-            class="flex size-full items-center justify-center rounded-full bg-white text-brand-600"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevrons-right"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 7l5 5l-5 5" /><path d="M13 7l5 5l-5 5" /></svg>
+          <span class="adm-slider-thumb flex size-full items-center justify-center rounded-full">
+            <svg
+              viewBox="0 0 24 24"
+              class="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.25"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M8 8l4 4-4 4" />
+              <path d="M13 8l4 4-4 4" />
+            </svg>
           </span>
         </button>
       </div>
@@ -89,8 +121,8 @@ export class StatusSlider {
   readonly advance = output<OrderStatus>();
 
   private readonly track = viewChild<ElementRef<HTMLElement>>('track');
-  /** Tamaño exterior del botón deslizable (h-9 / w-9). */
-  readonly thumbSize = 36;
+  /** Tamaño exterior del botón deslizable (h-10 / w-10). */
+  readonly thumbSize = 40;
   /** Margen del botón respecto al borde de la pista (top-1 / left-1). */
   readonly trackPadding = 4;
 
@@ -125,11 +157,24 @@ export class StatusSlider {
     return next ? ORDER_STATUS_LABELS[next] : '';
   });
 
-  readonly labelOpacity = computed(() => {
-    if (this.maxX <= 0) {
+  readonly thumbEnd = computed(() => this.offset() + this.thumbSize + this.trackPadding * 2);
+
+  readonly fillEnd = computed(() => this.thumbEnd());
+
+  /** Aparece gradualmente cuando el centro del relleno sale del thumb. */
+  readonly cuesOpacity = computed(() => {
+    if (!this.dragging()) {
+      return 0;
+    }
+    const center = this.thumbEnd() / 2;
+    const thumbStart = this.offset() + this.trackPadding;
+    const thumbEndPos = thumbStart + this.thumbSize;
+    if (center <= thumbStart || center >= thumbEndPos) {
       return 1;
     }
-    return Math.max(0, 1 - this.offset() / (this.maxX * 0.6));
+    const depth = center - thumbStart;
+    const fadeZone = this.thumbSize * 0.55;
+    return Math.max(0, 1 - depth / fadeZone);
   });
 
   onPointerDown(ev: PointerEvent): void {

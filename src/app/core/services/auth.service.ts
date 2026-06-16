@@ -13,6 +13,7 @@ export class AuthService {
   readonly session = this._session.asReadonly();
   readonly user = computed<User | null>(() => this._session()?.user ?? null);
   readonly isAuthenticated = computed(() => this._session() !== null);
+  readonly initialized = this._initialized.asReadonly();
 
   /** Se resuelve cuando ya se restauró la sesión inicial desde el storage. */
   private readonly ready: Promise<void>;
@@ -21,7 +22,13 @@ export class AuthService {
     this.ready = this.restoreSession();
     this.supabase.client.auth.onAuthStateChange((_event, session) => {
       this._session.set(session);
+      this._initialized.set(true);
     });
+  }
+
+  /** Espera a que la sesión guardada esté lista (útil al arrancar la app). */
+  whenReady(): Promise<void> {
+    return this.ready;
   }
 
   private async restoreSession(): Promise<void> {

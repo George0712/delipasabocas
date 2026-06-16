@@ -38,17 +38,15 @@ export interface SelectOption {
         type="button"
         (click)="toggle()"
         [disabled]="disabled()"
-        class="flex w-full items-center justify-between gap-2 rounded-xl border border-cream-200 bg-white px-3 py-2.5 text-left text-sm transition focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 disabled:opacity-50"
-        [class.border-brand-400]="open()"
-        [class.ring-2]="open()"
-        [class.ring-brand-100]="open()"
+        class="adm-select-trigger"
+        [class.adm-select-trigger-open]="open()"
       >
-        <span [class.text-gray-400]="!selectedLabel()">
+        <span [class.adm-text-muted]="!selectedLabel()">
           {{ selectedLabel() ?? placeholder() }}
         </span>
         <svg
           viewBox="0 0 24 24"
-          class="h-4 w-4 shrink-0 text-gray-400 transition"
+          class="adm-text-muted h-4 w-4 shrink-0 transition"
           [class.rotate-180]="open()"
           fill="none"
           stroke="currentColor"
@@ -60,10 +58,7 @@ export interface SelectOption {
       </button>
 
       @if (open()) {
-        <ul
-          class="absolute left-0 right-0 top-full z-30 mt-1 max-h-48 overflow-y-auto rounded-xl border border-cream-200 bg-white py-1 shadow-lg"
-          role="listbox"
-        >
+        <ul class="adm-select-menu" role="listbox">
           @for (option of options(); track option.value) {
             <li>
               <button
@@ -72,12 +67,8 @@ export interface SelectOption {
                 [attr.aria-selected]="value() === option.value"
                 [disabled]="option.disabled"
                 (click)="pick(option)"
-                class="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-sm transition disabled:opacity-40"
-                [class.bg-brand-50]="value() === option.value"
-                [class.text-brand-600]="value() === option.value"
-                [class.font-semibold]="value() === option.value"
-                [class.text-gray-700]="value() !== option.value"
-                [class.hover:bg-cream-50]="value() !== option.value"
+                class="adm-select-option"
+                [class.adm-select-option-active]="value() === option.value"
               >
                 <span>{{ option.label }}</span>
                 @if (value() === option.value) {

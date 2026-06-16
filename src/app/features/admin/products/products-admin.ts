@@ -20,16 +20,12 @@ type Filter = 'all' | ProductKind;
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, CopPipe, CustomSelect],
   template: `
-    <div class="mb-5 flex items-center justify-between gap-3">
+    <div class="mb-6 flex items-center justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Productos</h1>
-        <p class="mt-0.5 text-sm text-gray-500">Bandejas y combos para eventos.</p>
+        <h1 class="adm-heading">Productos</h1>
+        <p class="adm-subheading">Bandejas y combos para eventos.</p>
       </div>
-      <button
-        type="button"
-        (click)="openCreate()"
-        class="flex shrink-0 items-center gap-1.5 rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-brand-600"
-      >
+      <button type="button" (click)="openCreate()" class="adm-btn-primary flex shrink-0 items-center gap-1.5">
         <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M12 5v14M5 12h14" stroke-linecap="round" />
         </svg>
@@ -42,13 +38,8 @@ type Filter = 'all' | ProductKind;
         <button
           type="button"
           (click)="filter.set(f.value)"
-          class="rounded-full px-3 py-1.5 text-xs font-semibold transition"
-          [class.bg-brand-500]="filter() === f.value"
-          [class.text-white]="filter() === f.value"
-          [class.bg-white]="filter() !== f.value"
-          [class.text-gray-600]="filter() !== f.value"
-          [class.border]="filter() !== f.value"
-          [class.border-cream-200]="filter() !== f.value"
+          class="adm-chip"
+          [class.adm-chip-active]="filter() === f.value"
         >
           {{ f.label }}
         </button>
@@ -56,66 +47,68 @@ type Filter = 'all' | ProductKind;
     </div>
 
     @if (notice()) {
-      <p class="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-700">{{ notice() }}</p>
+      <p class="adm-alert adm-alert-warning mb-4">{{ notice() }}</p>
     }
 
     @if (loading()) {
-      <p class="text-sm text-gray-400">Cargando...</p>
+      <p class="adm-text-muted text-sm">Cargando...</p>
     } @else if (filtered().length === 0) {
-      <div class="rounded-2xl border border-cream-200 bg-white p-8 text-center">
-        <p class="text-sm text-gray-400">No hay productos en este filtro.</p>
+      <div class="adm-card p-8 text-center">
+        <p class="adm-text-muted text-sm">No hay productos en este filtro.</p>
       </div>
     } @else {
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div class="adm-stagger grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         @for (product of filtered(); track product.id) {
-          <div class="flex flex-col rounded-2xl border border-cream-200 bg-white p-4 shadow-sm transition hover:shadow-md">
+          <div class="adm-card adm-card-interactive flex flex-col p-4">
             <div class="flex items-start justify-between gap-2">
               <div class="min-w-0">
                 <div class="flex flex-wrap items-center gap-1.5">
-                  <p class="truncate text-sm font-bold text-gray-900">{{ product.name }}</p>
+                  <p class="adm-text truncate text-sm font-bold">{{ product.name }}</p>
                   <span
-                    class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
-                    [class.bg-violet-50]="isCombo(product)"
-                    [class.text-violet-700]="isCombo(product)"
-                    [class.bg-sky-50]="!isCombo(product)"
-                    [class.text-sky-700]="!isCombo(product)"
+                    class="adm-badge"
+                    [class.adm-badge-violet]="isCombo(product)"
+                    [class.adm-badge-info]="!isCombo(product)"
                   >
                     {{ isCombo(product) ? 'Combo' : 'Bandeja' }}
                   </span>
                 </div>
-                <p class="truncate text-xs text-gray-500">{{ product.description }}</p>
+                <p class="adm-text-muted truncate text-xs">{{ product.description }}</p>
               </div>
               <span
-                class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold"
-                [class.bg-emerald-50]="product.available"
-                [class.text-emerald-700]="product.available"
-                [class.bg-gray-100]="!product.available"
-                [class.text-gray-500]="!product.available"
+                class="adm-badge"
+                [class.adm-badge-success]="product.available"
+                [class.adm-badge-muted]="!product.available"
               >
                 {{ product.available ? 'Disponible' : 'Oculto' }}
               </span>
             </div>
 
-            <div class="mt-3 flex items-center justify-between border-t border-cream-100 pt-3">
+            <div class="adm-divider mt-3 flex items-center justify-between border-t pt-3">
               <div>
-                <span class="text-lg font-bold text-brand-500">{{ product.price | cop }}</span>
+                <span class="adm-text-primary text-lg font-bold">{{ product.price | cop }}</span>
                 @if (product.referencePrice && product.referencePrice > product.price) {
-                  <span class="ml-1.5 text-xs text-gray-400 line-through">
+                  <span class="adm-text-muted ml-1.5 text-xs line-through">
                     {{ product.referencePrice | cop }}
                   </span>
                 }
               </div>
-              <span class="text-xs text-gray-400">
+              <span class="adm-text-muted text-xs">
                 {{ product.trayCount }} {{ product.trayCount === 1 ? 'bandeja' : 'bandejas' }}
               </span>
             </div>
 
             <div class="mt-4 flex items-center gap-2">
-              <button type="button" (click)="openEdit(product)" class="flex-1 rounded-xl border border-cream-200 bg-cream-50 px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-cream-100">Editar</button>
-              <button type="button" (click)="toggleAvailability(product)" class="flex-1 rounded-xl px-3 py-2 text-xs font-semibold transition" [class.bg-amber-50]="product.available" [class.text-amber-700]="product.available" [class.bg-emerald-50]="!product.available" [class.text-emerald-700]="!product.available">
+              <button type="button" (click)="openEdit(product)" class="adm-btn-ghost flex-1">Editar</button>
+              <button
+                type="button"
+                (click)="toggleAvailability(product)"
+                class="flex-1"
+                [class.adm-btn-soft-warning]="product.available"
+                [class.adm-btn-soft-success]="!product.available"
+              >
                 {{ product.available ? 'Ocultar' : 'Mostrar' }}
               </button>
-              <button type="button" (click)="remove(product)" class="rounded-xl border border-red-100 bg-red-50 p-2 text-red-500 transition hover:bg-red-100" aria-label="Eliminar">
+              <button type="button" (click)="remove(product)" class="adm-btn-danger" aria-label="Eliminar">
                 <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke-linecap="round" stroke-linejoin="round" /></svg>
               </button>
             </div>
@@ -125,15 +118,16 @@ type Filter = 'all' | ProductKind;
     }
 
     @if (showForm()) {
-      <div class="fixed inset-0 z-40 bg-black/40" (click)="closeForm()" aria-hidden="true"></div>
-      <div class="fixed left-1/2 top-1/2 z-50 flex max-h-[90vh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div class="overflow-y-auto p-6">
-        <h2 class="mb-4 text-base font-semibold text-gray-800">
+      <div class="adm-modal-overlay" role="dialog" aria-modal="true">
+        <div class="adm-modal-backdrop" (click)="closeForm()" aria-hidden="true"></div>
+        <div class="adm-modal adm-card adm-modal-panel shadow-2xl">
+          <div class="overflow-y-auto p-6">
+        <h2 class="adm-text mb-4 text-base font-semibold">
           {{ editingId() ? 'Editar producto' : 'Nuevo producto' }}
         </h2>
         <form [formGroup]="form" (ngSubmit)="save()" class="space-y-3">
           <label class="block">
-            <span class="mb-1 block text-xs font-medium text-gray-500">Tipo</span>
+            <span class="adm-label">Tipo</span>
             <app-custom-select
               formControlName="kind"
               placeholder="Selecciona el tipo"
@@ -142,66 +136,67 @@ type Filter = 'all' | ProductKind;
           </label>
 
           <label class="block">
-            <span class="mb-1 block text-xs font-medium text-gray-500">Nombre</span>
-            <input type="text" formControlName="name" placeholder="Bandeja 25" class="w-full rounded-xl border border-cream-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100" />
+            <span class="adm-label">Nombre</span>
+            <input type="text" formControlName="name" placeholder="Bandeja 25" class="adm-input" />
           </label>
 
           <label class="block">
-            <span class="mb-1 block text-xs font-medium text-gray-500">Descripción</span>
-            <input type="text" formControlName="description" placeholder="Empanadas de pollo" class="w-full rounded-xl border border-cream-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100" />
+            <span class="adm-label">Descripción</span>
+            <input type="text" formControlName="description" placeholder="Empanadas de pollo" class="adm-input" />
           </label>
 
           @if (form.controls.kind.value === 'combo') {
             <div class="grid grid-cols-2 gap-3">
               <label class="block">
-                <span class="mb-1 block text-xs font-medium text-gray-500">Precio</span>
-                <input type="number" formControlName="price" placeholder="25000" class="w-full rounded-xl border border-cream-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100" />
+                <span class="adm-label">Precio</span>
+                <input type="number" formControlName="price" placeholder="25000" class="adm-input" />
               </label>
               <label class="block">
-                <span class="mb-1 block text-xs font-medium text-gray-500">Bandejas que incluye</span>
-                <input type="number" formControlName="trayCount" min="1" class="w-full rounded-xl border border-cream-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100" />
+                <span class="adm-label">Bandejas que incluye</span>
+                <input type="number" formControlName="trayCount" min="1" class="adm-input" />
               </label>
             </div>
           } @else {
             <label class="block">
-              <span class="mb-1 block text-xs font-medium text-gray-500">Precio</span>
-              <input type="number" formControlName="price" placeholder="25000" class="w-full rounded-xl border border-cream-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100" />
+              <span class="adm-label">Precio</span>
+              <input type="number" formControlName="price" placeholder="25000" class="adm-input" />
             </label>
           }
 
           @if (form.controls.kind.value === 'combo') {
             <label class="block">
-              <span class="mb-1 block text-xs font-medium text-gray-500">
+              <span class="adm-label">
                 Precio de referencia
-                <span class="text-gray-300">(para mostrar ahorro)</span>
+                <span class="adm-text-muted opacity-60">(para mostrar ahorro)</span>
               </span>
-              <input type="number" formControlName="referencePrice" placeholder="63000" class="w-full rounded-xl border border-cream-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100" />
+              <input type="number" formControlName="referencePrice" placeholder="63000" class="adm-input" />
             </label>
           }
 
           <label class="block">
-            <span class="mb-1 block text-xs font-medium text-gray-500">
-              Stock <span class="text-gray-300">(opcional)</span>
+            <span class="adm-label">
+              Stock <span class="adm-text-muted opacity-60">(opcional)</span>
             </span>
-            <input type="number" formControlName="stock" placeholder="Sin límite" class="w-full rounded-xl border border-cream-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100" />
+            <input type="number" formControlName="stock" placeholder="Sin límite" class="adm-input" />
           </label>
 
-          <label class="flex items-center justify-between rounded-xl border border-cream-200 px-3 py-2.5">
-            <span class="text-sm font-medium text-gray-600">Disponible para clientes</span>
-            <input type="checkbox" formControlName="available" class="h-5 w-5 accent-brand-500" />
+          <label class="adm-checkbox-row">
+            <span class="adm-text-secondary text-sm font-medium">Disponible para clientes</span>
+            <input type="checkbox" formControlName="available" />
           </label>
 
           @if (error()) {
-            <p class="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{{ error() }}</p>
+            <p class="adm-alert adm-alert-error text-xs">{{ error() }}</p>
           }
 
           <div class="flex justify-end gap-2 pt-2">
-            <button type="button" (click)="closeForm()" class="rounded-xl px-4 py-2.5 text-sm font-medium text-gray-500 hover:bg-cream-100">Cancelar</button>
-            <button type="submit" [disabled]="form.invalid || saving()" class="rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white transition enabled:hover:bg-brand-600 disabled:opacity-40">
+            <button type="button" (click)="closeForm()" class="adm-btn-ghost">Cancelar</button>
+            <button type="submit" [disabled]="form.invalid || saving()" class="adm-btn-primary disabled:opacity-40">
               {{ saving() ? 'Guardando...' : editingId() ? 'Guardar' : 'Agregar' }}
             </button>
           </div>
         </form>
+          </div>
         </div>
       </div>
     }

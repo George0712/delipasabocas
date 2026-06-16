@@ -27,34 +27,20 @@ type Filter = OrderStatus | 'all';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CopPipe, DateCoPipe, TimeCoPipe, StatusSlider],
   template: `
-    <div class="mb-5 flex items-center justify-between">
+    <div class="mb-6 flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Pedidos</h1>
-        <p class="mt-0.5 text-sm text-gray-500">
-          Desliza para avanzar cada pedido al siguiente estado.
-        </p>
+        <h1 class="adm-heading">Pedidos</h1>
+        <p class="adm-subheading">Desliza para avanzar cada pedido al siguiente estado.</p>
       </div>
-      <button
-        type="button"
-        (click)="load()"
-        class="rounded-xl border border-cream-200 bg-white px-3 py-2 text-xs font-semibold text-gray-600 transition hover:bg-cream-50"
-      >
-        Actualizar
-      </button>
+      <button type="button" (click)="load()" class="adm-btn-ghost">Actualizar</button>
     </div>
 
-    <!-- Filtros tipo chips -->
     <div class="mb-5 flex flex-wrap gap-2">
       <button
         type="button"
         (click)="filter.set('all')"
-        class="rounded-full px-3 py-1.5 text-xs font-semibold transition"
-        [class.bg-brand-500]="filter() === 'all'"
-        [class.text-white]="filter() === 'all'"
-        [class.bg-white]="filter() !== 'all'"
-        [class.text-gray-600]="filter() !== 'all'"
-        [class.border]="filter() !== 'all'"
-        [class.border-cream-200]="filter() !== 'all'"
+        class="adm-chip"
+        [class.adm-chip-active]="filter() === 'all'"
       >
         Todos ({{ orders().length }})
       </button>
@@ -62,13 +48,8 @@ type Filter = OrderStatus | 'all';
         <button
           type="button"
           (click)="filter.set(status)"
-          class="rounded-full px-3 py-1.5 text-xs font-semibold transition"
-          [class.bg-brand-500]="filter() === status"
-          [class.text-white]="filter() === status"
-          [class.bg-white]="filter() !== status"
-          [class.text-gray-600]="filter() !== status"
-          [class.border]="filter() !== status"
-          [class.border-cream-200]="filter() !== status"
+          class="adm-chip"
+          [class.adm-chip-active]="filter() === status"
         >
           {{ statusLabels[status] }} ({{ countByStatus()[status] }})
         </button>
@@ -76,88 +57,65 @@ type Filter = OrderStatus | 'all';
     </div>
 
     @if (loading()) {
-      <p class="text-sm text-gray-400">Cargando...</p>
+      <p class="text-sm" [style.color]="'var(--adm-text-muted)'">Cargando...</p>
     } @else if (filtered().length === 0) {
-      <div class="rounded-2xl border border-cream-200 bg-white p-8 text-center">
-        <p class="text-sm text-gray-400">No hay pedidos en este filtro.</p>
+      <div class="adm-card p-8 text-center">
+        <p class="text-sm" [style.color]="'var(--adm-text-muted)'">No hay pedidos en este filtro.</p>
       </div>
     } @else {
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div class="adm-stagger grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         @for (order of filtered(); track order.id) {
-          <div
-            class="flex flex-col rounded-2xl border border-cream-200 bg-white p-4 shadow-sm transition hover:shadow-md"
-          >
+          <div class="adm-card adm-card-interactive flex flex-col p-4">
             <div class="flex items-start justify-between gap-2">
               <div class="min-w-0">
-                <p class="truncate text-sm font-bold text-gray-900">
-                  #{{ order.orderNumber }}
-                </p>
-                <p class="truncate text-sm text-gray-600">{{ order.customerName }}</p>
-                <p class="mt-1 line-clamp-2 text-xs leading-snug text-gray-500">
-                  <span class="font-medium text-gray-400">Dirección:</span>
-                  {{ order.address }}
+                <p class="truncate text-sm font-bold" [style.color]="'var(--adm-text)'">#{{ order.orderNumber }}</p>
+                <p class="truncate text-sm" [style.color]="'var(--adm-text-secondary)'">{{ order.customerName }}</p>
+                <p class="mt-1 line-clamp-2 text-xs leading-snug" [style.color]="'var(--adm-text-muted)'">
+                  <span class="font-medium">Dirección:</span> {{ order.address }}
                 </p>
               </div>
-              <span [class]="badgeClass(order.status)">
-                {{ statusLabels[order.status] }}
-              </span>
+              <span [class]="badgeClass(order.status)">{{ statusLabels[order.status] }}</span>
             </div>
 
             @if (order.items.length > 0) {
-              <ul class="mt-3 space-y-1.5 border-t border-cream-100 pt-3">
+              <ul class="adm-divider mt-3 space-y-1.5 border-t pt-3">
                 @for (item of order.items; track item.id) {
                   <li class="flex items-start justify-between gap-2 text-xs">
-                    <span class="min-w-0 flex-1 leading-snug text-gray-600">
-                      <span class="font-semibold text-gray-800">{{ item.quantity }}×</span>
+                    <span class="min-w-0 flex-1 leading-snug" [style.color]="'var(--adm-text-secondary)'">
+                      <span class="font-semibold" [style.color]="'var(--adm-text)'">{{ item.quantity }}×</span>
                       {{ item.productName }}
                     </span>
-                    <span class="shrink-0 font-medium text-gray-700">
-                      {{ item.subtotal | cop }}
-                    </span>
+                    <span class="shrink-0 font-medium" [style.color]="'var(--adm-text)'">{{ item.subtotal | cop }}</span>
                   </li>
                 }
               </ul>
-              <div class="mt-2 space-y-0.5 border-t border-dashed border-cream-100 pt-2 text-[11px] text-gray-400">
-                <div class="flex justify-between">
-                  <span>Subtotal</span>
-                  <span>{{ order.subtotal | cop }}</span>
-                </div>
+              <div class="adm-divider mt-2 space-y-0.5 border-t border-dashed pt-2 text-[11px]" [style.color]="'var(--adm-text-muted)'">
+                <div class="flex justify-between"><span>Subtotal</span><span>{{ order.subtotal | cop }}</span></div>
                 @if (order.shippingCost > 0) {
-                  <div class="flex justify-between">
-                    <span>Domicilio</span>
-                    <span>{{ order.shippingCost | cop }}</span>
-                  </div>
+                  <div class="flex justify-between"><span>Domicilio</span><span>{{ order.shippingCost | cop }}</span></div>
                 }
               </div>
             } @else {
-              <p class="mt-3 border-t border-cream-100 pt-3 text-xs text-gray-400">
-                Sin detalle de productos.
-              </p>
+              <p class="adm-divider mt-3 border-t pt-3 text-xs" [style.color]="'var(--adm-text-muted)'">Sin detalle de productos.</p>
             }
 
             @if (order.notes) {
-              <p class="mt-2 line-clamp-2 text-[11px] italic text-gray-400">
-                Nota: {{ order.notes }}
-              </p>
+              <p class="mt-2 line-clamp-2 text-[11px] italic" [style.color]="'var(--adm-text-muted)'">Nota: {{ order.notes }}</p>
             }
 
-            <div class="mt-3 flex items-center justify-between border-t border-cream-100 pt-3">
-              <p class="text-xs text-gray-400">
-                {{ order.deliveryDate | dateCo }} · {{ order.deliveryTime | timeCo }}
-              </p>
-              <p class="text-base font-bold text-brand-500">{{ order.total | cop }}</p>
+            <div class="adm-divider mt-3 flex items-center justify-between border-t pt-3">
+              <p class="text-xs" [style.color]="'var(--adm-text-muted)'">{{ order.deliveryDate | dateCo }} · {{ order.deliveryTime | timeCo }}</p>
+              <p class="text-base font-bold text-[var(--adm-primary)]">{{ order.total | cop }}</p>
             </div>
 
             <div class="mt-4">
-              <app-status-slider
-                [status]="order.status"
-                (advance)="advanceStatus(order, $event)"
-              />
+              <app-status-slider [status]="order.status" (advance)="advanceStatus(order, $event)" />
               @if (order.status !== 'delivered' && order.status !== 'cancelled') {
                 <button
                   type="button"
                   (click)="cancelOrder(order)"
-                  class="mt-2 w-full text-center text-[11px] font-medium text-gray-400 transition hover:text-red-500"
+                  class="mt-2 w-full text-center text-[11px] font-medium transition hover:text-red-500"
+                  [style.color]="'var(--adm-text-muted)'"
                 >
                   Cancelar pedido
                 </button>
@@ -181,12 +139,12 @@ export class Orders implements OnInit {
   readonly filter = signal<Filter>('all');
 
   private readonly badgeClasses: Record<OrderStatus, string> = {
-    pending_payment: 'bg-amber-50 text-amber-700',
-    payment_validated: 'bg-sky-50 text-sky-700',
-    preparing: 'bg-violet-50 text-violet-700',
-    on_the_way: 'bg-blue-50 text-blue-700',
-    delivered: 'bg-emerald-50 text-emerald-700',
-    cancelled: 'bg-gray-100 text-gray-500',
+    pending_payment: 'adm-badge-warning',
+    payment_validated: 'adm-badge-info',
+    preparing: 'adm-badge-violet',
+    on_the_way: 'adm-badge-blue',
+    delivered: 'adm-badge-success',
+    cancelled: 'adm-badge-muted',
   };
 
   readonly filtered = computed(() => {
@@ -207,10 +165,7 @@ export class Orders implements OnInit {
   });
 
   badgeClass(status: OrderStatus): string {
-    return (
-      'inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ' +
-      this.badgeClasses[status]
-    );
+    return 'adm-badge ' + this.badgeClasses[status];
   }
 
   async ngOnInit(): Promise<void> {

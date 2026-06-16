@@ -12,52 +12,49 @@ import {
 import { Router } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { AdminThemeService } from '../../../core/services/admin-theme.service';
 
 @Component({
   selector: 'app-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule],
   template: `
-    <div class="grid min-h-screen place-items-center bg-cream-100 px-4">
-      <div class="w-full max-w-sm">
-        <div class="mb-6 text-center">
-          <span class="font-brand text-3xl text-accent-600">DeliPasabocas</span>
-          <p class="mt-1 text-sm text-gray-500">Panel administrativo</p>
+    <div class="admin-shell grid min-h-screen place-items-center px-4" [attr.data-theme]="theme.theme()">
+      <div class="adm-page w-full max-w-sm">
+        <div class="mb-8 text-center">
+          <span class="font-brand text-3xl text-[var(--adm-primary-soft)]">DeliPasabocas</span>
+          <p class="adm-subheading mt-2">Panel administrativo</p>
         </div>
 
         <form
           [formGroup]="form"
           (ngSubmit)="submit()"
-          class="space-y-4 rounded-2xl border border-cream-200 bg-white p-6 shadow-sm"
+          class="adm-card space-y-4 p-6"
         >
           <label class="block">
-            <span class="mb-1 block text-xs font-medium text-gray-500">
-              Correo
-            </span>
+            <span class="adm-label">Correo</span>
             <input
               type="email"
               formControlName="email"
               autocomplete="username"
               placeholder="admin@delipasabocas.com"
-              class="w-full rounded-xl border border-cream-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+              class="adm-input"
             />
           </label>
 
           <label class="block">
-            <span class="mb-1 block text-xs font-medium text-gray-500">
-              Contraseña
-            </span>
+            <span class="adm-label">Contraseña</span>
             <input
               type="password"
               formControlName="password"
               autocomplete="current-password"
               placeholder="••••••••"
-              class="w-full rounded-xl border border-cream-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+              class="adm-input"
             />
           </label>
 
           @if (error()) {
-            <p class="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">
+            <p class="rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-500">
               {{ error() }}
             </p>
           }
@@ -65,11 +62,22 @@ import { AuthService } from '../../../core/services/auth.service';
           <button
             type="submit"
             [disabled]="form.invalid || loading()"
-            class="w-full rounded-xl bg-brand-500 py-3 text-sm font-semibold text-white shadow-md transition enabled:hover:bg-brand-600 disabled:opacity-40"
+            class="adm-btn-primary w-full py-3"
           >
             {{ loading() ? 'Ingresando...' : 'Ingresar' }}
           </button>
         </form>
+
+        <div class="mt-4 flex justify-center">
+          <button
+            type="button"
+            (click)="theme.toggle()"
+            class="adm-btn-ghost"
+            [attr.aria-label]="theme.theme() === 'light' ? 'Modo oscuro' : 'Modo claro'"
+          >
+            {{ theme.theme() === 'light' ? 'Modo oscuro' : 'Modo claro' }}
+          </button>
+        </div>
       </div>
     </div>
   `,
@@ -79,6 +87,7 @@ export class Login {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
+  readonly theme = inject(AdminThemeService);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
 

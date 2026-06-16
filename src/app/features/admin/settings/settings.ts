@@ -15,27 +15,24 @@ import {
 } from '../../../core/models/business-settings.model';
 import { BusinessSettingsService } from '../../../core/services/business-settings.service';
 
-const inputClass =
-  'w-full rounded-xl border border-cream-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100';
+const inputClass = 'adm-input';
 
 @Component({
   selector: 'app-settings',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule],
   template: `
-    <div class="mb-5">
-      <h1 class="text-2xl font-bold text-gray-900">Configuración</h1>
-      <p class="mt-0.5 text-sm text-gray-500">
-        Ajustes del negocio organizados por sección.
-      </p>
+    <div class="mb-6">
+      <h1 class="adm-heading">Configuración</h1>
+      <p class="adm-subheading">Ajustes del negocio organizados por sección.</p>
     </div>
 
     @if (loading()) {
-      <p class="text-sm text-gray-400">Cargando...</p>
+      <p class="text-sm" [style.color]="'var(--adm-text-muted)'">Cargando...</p>
     } @else {
       <div class="flex flex-col gap-4 lg:flex-row lg:items-start">
         <nav
-          class="flex gap-2 overflow-x-auto rounded-2xl border border-cream-200 bg-white p-2 shadow-sm lg:w-56 lg:flex-col lg:overflow-visible"
+          class="adm-card flex gap-2 overflow-x-auto p-2 lg:w-56 lg:flex-col lg:overflow-visible"
           aria-label="Secciones de configuración"
         >
           @for (section of sections; track section.id) {
@@ -43,16 +40,14 @@ const inputClass =
               type="button"
               (click)="activeSection.set(section.id)"
               class="shrink-0 rounded-xl px-3 py-2.5 text-left transition lg:w-full"
-              [class.bg-brand-500]="activeSection() === section.id"
-              [class.text-white]="activeSection() === section.id"
-              [class.text-gray-600]="activeSection() !== section.id"
-              [class.hover:bg-cream-50]="activeSection() !== section.id"
+              [class.adm-chip-active]="activeSection() === section.id"
+              [style.color]="activeSection() === section.id ? '#fff' : 'var(--adm-text-secondary)'"
+              [style.background]="activeSection() === section.id ? 'var(--adm-primary)' : 'transparent'"
             >
               <span class="block text-sm font-semibold">{{ section.label }}</span>
               <span
                 class="mt-0.5 hidden text-[11px] lg:block"
-                [class.text-brand-100]="activeSection() === section.id"
-                [class.text-gray-400]="activeSection() !== section.id"
+                [style.color]="activeSection() === section.id ? 'rgba(255,255,255,0.75)' : 'var(--adm-text-muted)'"
               >
                 {{ section.description }}
               </span>
@@ -63,22 +58,22 @@ const inputClass =
         <form
           [formGroup]="form"
           (ngSubmit)="save()"
-          class="min-w-0 flex-1 rounded-2xl border border-cream-200 bg-white shadow-sm"
+          class="adm-card min-w-0 flex-1 overflow-hidden"
         >
-          <div class="border-b border-cream-100 px-5 py-4">
-            <h2 class="text-base font-bold text-gray-900">{{ activeMeta().label }}</h2>
-            <p class="mt-0.5 text-sm text-gray-500">{{ activeMeta().description }}</p>
+          <div class="adm-divider border-b px-5 py-4">
+            <h2 class="adm-text text-base font-bold">{{ activeMeta().label }}</h2>
+            <p class="adm-subheading">{{ activeMeta().description }}</p>
           </div>
 
           <div class="space-y-4 p-5">
             @switch (activeSection()) {
               @case ('general') {
-                <div class="rounded-xl bg-cream-50 px-4 py-3">
-                  <p class="text-xs uppercase tracking-wide text-gray-400">Negocio</p>
-                  <p class="mt-1 text-sm font-semibold text-gray-800">{{ businessName }}</p>
-                  <p class="text-sm text-gray-500">{{ businessCity }}</p>
+                <div class="adm-surface-inset px-4 py-3">
+                  <p class="adm-text-muted text-xs uppercase tracking-wide">Negocio</p>
+                  <p class="adm-text mt-1 text-sm font-semibold">{{ businessName }}</p>
+                  <p class="adm-text-secondary text-sm">{{ businessCity }}</p>
                 </div>
-                <p class="text-sm text-gray-500">
+                <p class="adm-text-secondary text-sm">
                   Nombre y ciudad se definen en el despliegue de la app. Aquí podrás
                   agregar más opciones generales en futuras versiones (horarios,
                   pedido mínimo, mensajes automáticos, etc.).
@@ -88,14 +83,14 @@ const inputClass =
               @case ('contact') {
                 <div formGroupName="contact">
                   <label class="block space-y-1.5">
-                    <span class="text-sm font-medium text-gray-700">Número de WhatsApp</span>
+                    <span class="adm-label">Número de WhatsApp</span>
                     <input
                       type="tel"
                       formControlName="whatsappNumber"
                       placeholder="573001234567"
                       [class]="inputClass"
                     />
-                    <span class="text-xs text-gray-400">
+                    <span class="adm-text-muted text-xs">
                       Código de país + celular, sin espacios ni el signo +.
                     </span>
                   </label>
@@ -105,11 +100,11 @@ const inputClass =
               @case ('payments') {
                 <div formGroupName="payments" class="space-y-4">
                   <label class="block space-y-1.5">
-                    <span class="text-sm font-medium text-gray-700">Número Nequi</span>
+                    <span class="adm-label">Número Nequi</span>
                     <input type="tel" formControlName="nequi" placeholder="3001234567" [class]="inputClass" />
                   </label>
                   <label class="block space-y-1.5">
-                    <span class="text-sm font-medium text-gray-700">Cuenta Bancolombia (ahorros)</span>
+                    <span class="adm-label">Cuenta Bancolombia (ahorros)</span>
                     <input
                       type="text"
                       formControlName="bancolombiaAccount"
@@ -118,7 +113,7 @@ const inputClass =
                     />
                   </label>
                   <label class="block space-y-1.5">
-                    <span class="text-sm font-medium text-gray-700">Titular de la cuenta</span>
+                    <span class="adm-label">Titular de la cuenta</span>
                     <input
                       type="text"
                       formControlName="bancolombiaHolder"
@@ -126,21 +121,21 @@ const inputClass =
                       [class]="inputClass"
                     />
                   </label>
-                  <p class="text-xs text-gray-400">
+                  <p class="adm-text-muted text-xs">
                     El código QR de Nequi se actualiza subiendo la imagen en
-                    <code class="rounded bg-cream-100 px-1">public/nequi-qr2.jpeg</code>.
+                    <code class="adm-code">public/nequi-qr2.jpeg</code>.
                   </p>
                 </div>
               }
 
               @case ('shipping') {
                 <div formGroupName="shipping" class="space-y-4">
-                  <div formGroupName="origin" class="space-y-4 rounded-xl border border-cream-100 bg-cream-50/50 p-4">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                  <div formGroupName="origin" class="adm-surface-inset space-y-4 p-4">
+                    <p class="adm-text-muted text-xs font-semibold uppercase tracking-wide">
                       Punto de producción
                     </p>
                     <label class="block space-y-1.5">
-                      <span class="text-sm font-medium text-gray-700">Nombre del lugar</span>
+                      <span class="adm-label">Nombre del lugar</span>
                       <input
                         type="text"
                         formControlName="label"
@@ -150,25 +145,25 @@ const inputClass =
                     </label>
                     <div class="grid grid-cols-2 gap-3">
                       <label class="block space-y-1.5">
-                        <span class="text-sm font-medium text-gray-700">Latitud</span>
+                        <span class="adm-label">Latitud</span>
                         <input type="number" step="0.000001" formControlName="lat" [class]="inputClass" />
                       </label>
                       <label class="block space-y-1.5">
-                        <span class="text-sm font-medium text-gray-700">Longitud</span>
+                        <span class="adm-label">Longitud</span>
                         <input type="number" step="0.000001" formControlName="lng" [class]="inputClass" />
                       </label>
                     </div>
-                    <p class="text-xs text-gray-400">
+                    <p class="adm-text-muted text-xs">
                       Usa Google Maps: clic derecho en tu cocina → copiar coordenadas.
                     </p>
                   </div>
 
-                  <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                  <p class="adm-text-muted text-xs font-semibold uppercase tracking-wide">
                     Tarifas de domicilio
                   </p>
                   <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <label class="block space-y-1.5">
-                      <span class="text-sm font-medium text-gray-700">Radio gratis (km)</span>
+                      <span class="adm-label">Radio gratis (km)</span>
                       <input
                         type="number"
                         min="0"
@@ -176,10 +171,10 @@ const inputClass =
                         formControlName="freeRadiusKm"
                         [class]="inputClass"
                       />
-                      <span class="text-xs text-gray-400">Malambo y alrededores cercanos.</span>
+                      <span class="adm-text-muted text-xs">Malambo y alrededores cercanos.</span>
                     </label>
                     <label class="block space-y-1.5">
-                      <span class="text-sm font-medium text-gray-700">Referencia Malambo (COP)</span>
+                      <span class="adm-label">Referencia Malambo (COP)</span>
                       <input
                         type="number"
                         min="0"
@@ -187,10 +182,10 @@ const inputClass =
                         formControlName="malamboReferenceCost"
                         [class]="inputClass"
                       />
-                      <span class="text-xs text-gray-400">Base típica 3.000 – 4.000.</span>
+                      <span class="adm-text-muted text-xs">Base típica 3.000 – 4.000.</span>
                     </label>
                     <label class="block space-y-1.5">
-                      <span class="text-sm font-medium text-gray-700">Cobro por km extra (COP)</span>
+                      <span class="adm-label">Cobro por km extra (COP)</span>
                       <input
                         type="number"
                         min="0"
@@ -200,7 +195,7 @@ const inputClass =
                       />
                     </label>
                     <label class="block space-y-1.5">
-                      <span class="text-sm font-medium text-gray-700">Tope máximo (COP)</span>
+                      <span class="adm-label">Tope máximo (COP)</span>
                       <input
                         type="number"
                         min="0"
@@ -210,7 +205,7 @@ const inputClass =
                       />
                     </label>
                     <label class="block space-y-1.5 sm:col-span-2">
-                      <span class="text-sm font-medium text-gray-700">Redondeo (COP)</span>
+                      <span class="adm-label">Redondeo (COP)</span>
                       <input
                         type="number"
                         min="100"
@@ -218,7 +213,7 @@ const inputClass =
                         formControlName="roundTo"
                         [class]="inputClass"
                       />
-                      <span class="text-xs text-gray-400">Ej. 500 redondea a $10.500, $11.000...</span>
+                      <span class="adm-text-muted text-xs">Ej. 500 redondea a $10.500, $11.000...</span>
                     </label>
                   </div>
                 </div>
@@ -226,18 +221,18 @@ const inputClass =
             }
 
             @if (success()) {
-              <p class="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700">{{ success() }}</p>
+              <p class="adm-alert adm-alert-success">{{ success() }}</p>
             }
             @if (error()) {
-              <p class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{{ error() }}</p>
+              <p class="adm-alert adm-alert-error">{{ error() }}</p>
             }
           </div>
 
-          <div class="border-t border-cream-100 px-5 py-4">
+          <div class="adm-footer px-5 py-4">
             <button
               type="submit"
               [disabled]="form.invalid || saving()"
-              class="w-full rounded-xl bg-brand-500 py-3 text-sm font-semibold text-white shadow-md transition enabled:hover:bg-brand-600 disabled:opacity-40 sm:w-auto sm:px-8"
+              class="adm-btn-primary w-full sm:w-auto sm:px-8"
             >
               {{ saving() ? 'Guardando...' : 'Guardar cambios' }}
             </button>

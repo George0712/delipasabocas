@@ -15,26 +15,16 @@ interface BeforeInstallPromptEvent extends Event {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (visible()) {
-      <div
-        class="fixed inset-x-4 bottom-4 z-40 rounded-2xl border border-cream-200 bg-white p-4 shadow-lg sm:inset-x-auto sm:right-4 sm:max-w-sm"
-      >
-        <p class="text-sm font-semibold text-gray-900">Instala el panel admin</p>
-        <p class="mt-1 text-xs text-gray-500">
+      <div class="adm-modal adm-card fixed inset-x-4 bottom-4 z-40 p-4 sm:inset-x-auto sm:right-4 sm:max-w-sm">
+        <p class="adm-text text-sm font-semibold">Instala el panel admin</p>
+        <p class="adm-text-muted mt-1 text-xs">
           Agrégalo a tu pantalla de inicio para gestionar pedidos como una app.
         </p>
         <div class="mt-3 flex gap-2">
-          <button
-            type="button"
-            (click)="install()"
-            class="flex-1 rounded-xl bg-brand-500 py-2.5 text-xs font-semibold text-white"
-          >
+          <button type="button" (click)="install()" class="adm-btn-primary flex-1">
             Instalar
           </button>
-          <button
-            type="button"
-            (click)="dismiss()"
-            class="rounded-xl px-3 py-2.5 text-xs font-medium text-gray-500"
-          >
+          <button type="button" (click)="dismiss()" class="adm-btn-ghost">
             Ahora no
           </button>
         </div>

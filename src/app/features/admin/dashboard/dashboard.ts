@@ -21,81 +21,77 @@ import { CopPipe } from '../../../shared/pipes/cop.pipe';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CopPipe],
   template: `
-    <div class="mb-5">
-      <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-      <p class="mt-0.5 text-sm text-gray-500">Resumen del negocio en tiempo real.</p>
+    <div class="mb-6">
+      <h1 class="adm-heading">Dashboard</h1>
+      <p class="adm-subheading">Resumen del negocio en tiempo real.</p>
     </div>
 
     @if (loading()) {
-      <p class="text-sm text-gray-400">Cargando métricas...</p>
+      <p class="text-sm" [style.color]="'var(--adm-text-muted)'">Cargando métricas...</p>
     } @else if (metrics(); as m) {
-      <!-- KPIs principales -->
-      <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <div class="rounded-2xl border border-cream-200 bg-gradient-to-br from-brand-500 to-brand-600 p-4 text-white shadow-sm">
-          <div class="flex items-center gap-2 text-brand-100">
-            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span class="text-xs font-medium uppercase tracking-wide">Ventas totales</span>
+      <div class="adm-stagger grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div class="adm-card-kpi p-5">
+          <div class="flex items-center gap-2 text-white/80">
+            <span class="text-xs font-semibold uppercase tracking-wider">Ventas totales</span>
           </div>
-          <p class="mt-2 text-xl font-bold sm:text-2xl">{{ m.revenue | cop }}</p>
-          <p class="mt-1 text-xs text-brand-100">Este mes: {{ m.revenue_month | cop }}</p>
+          <p class="mt-3 text-2xl font-bold">{{ m.revenue | cop }}</p>
+          <p class="mt-1 text-xs text-white/70">Este mes: {{ m.revenue_month | cop }}</p>
         </div>
 
-        <div class="rounded-2xl border border-cream-200 bg-white p-4 shadow-sm">
-          <p class="text-xs font-medium uppercase tracking-wide text-gray-400">Pedidos activos</p>
-          <p class="mt-2 text-2xl font-bold text-gray-900">{{ m.active }}</p>
-          <p class="mt-1 text-xs text-amber-600">{{ m.pending }} por pagar</p>
+        <div class="adm-card p-5">
+          <p class="text-xs font-semibold uppercase tracking-wider" [style.color]="'var(--adm-text-muted)'">Pedidos activos</p>
+          <p class="mt-3 text-2xl font-bold" [style.color]="'var(--adm-text)'">{{ m.active }}</p>
+          <p class="mt-1 text-xs text-amber-500">{{ m.pending }} por pagar</p>
         </div>
 
-        <div class="rounded-2xl border border-cream-200 bg-white p-4 shadow-sm">
-          <p class="text-xs font-medium uppercase tracking-wide text-gray-400">Ticket promedio</p>
-          <p class="mt-2 text-2xl font-bold text-gray-900">{{ m.avg_ticket | cop }}</p>
-          <p class="mt-1 text-xs text-gray-400">{{ m.orders_total }} pedidos</p>
+        <div class="adm-card p-5">
+          <p class="text-xs font-semibold uppercase tracking-wider" [style.color]="'var(--adm-text-muted)'">Ticket promedio</p>
+          <p class="mt-3 text-2xl font-bold" [style.color]="'var(--adm-text)'">{{ m.avg_ticket | cop }}</p>
+          <p class="mt-1 text-xs" [style.color]="'var(--adm-text-muted)'">{{ m.orders_total }} pedidos</p>
         </div>
 
-        <div class="rounded-2xl border border-cream-200 bg-white p-4 shadow-sm">
-          <p class="text-xs font-medium uppercase tracking-wide text-gray-400">Clientes</p>
-          <p class="mt-2 text-2xl font-bold text-gray-900">{{ m.customers }}</p>
-          <p class="mt-1 text-xs text-emerald-600">{{ m.delivered }} entregados</p>
+        <div class="adm-card p-5">
+          <p class="text-xs font-semibold uppercase tracking-wider" [style.color]="'var(--adm-text-muted)'">Clientes</p>
+          <p class="mt-3 text-2xl font-bold" [style.color]="'var(--adm-text)'">{{ m.customers }}</p>
+          <p class="mt-1 text-xs text-emerald-500">{{ m.delivered }} entregados</p>
         </div>
       </div>
 
-      <div class="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <!-- Gráfico de ventas 7 días -->
-        <div class="rounded-2xl border border-cream-200 bg-white p-5 shadow-sm lg:col-span-2">
-          <h2 class="mb-4 text-base font-semibold text-gray-800">Ventas últimos 7 días</h2>
-          <div class="flex h-40 items-end justify-between gap-2">
+      <div class="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <div class="adm-card p-5 lg:col-span-2">
+          <h2 class="text-base font-semibold" [style.color]="'var(--adm-text)'">Ventas últimos 7 días</h2>
+          <div class="mt-5 flex h-44 items-end justify-between gap-2">
             @for (point of m.sales_7d; track point.day) {
               <div class="flex flex-1 flex-col items-center gap-2">
                 <div class="flex w-full flex-1 items-end">
                   <div
-                    class="w-full rounded-t-md bg-gradient-to-t from-brand-300 to-brand-500 transition-all"
+                    class="adm-bar w-full"
                     [style.height.%]="barHeight(point.total)"
                     [title]="point.total"
                     [style.min-height.px]="point.total > 0 ? 4 : 0"
                   ></div>
                 </div>
-                <span class="text-[10px] font-medium text-gray-400">{{ dayLabel(point.day) }}</span>
+                <span class="text-[10px] font-medium capitalize" [style.color]="'var(--adm-text-muted)'">{{ dayLabel(point.day) }}</span>
               </div>
             }
           </div>
         </div>
 
-        <!-- Top productos -->
-        <div class="rounded-2xl border border-cream-200 bg-white p-5 shadow-sm">
-          <h2 class="mb-4 text-base font-semibold text-gray-800">Más vendidos</h2>
+        <div class="adm-card p-5">
+          <h2 class="text-base font-semibold" [style.color]="'var(--adm-text)'">Más vendidos</h2>
           @if (m.top_products.length === 0) {
-            <p class="text-sm text-gray-400">Sin ventas aún.</p>
+            <p class="mt-4 text-sm" [style.color]="'var(--adm-text-muted)'">Sin ventas aún.</p>
           } @else {
-            <ul class="space-y-3">
+            <ul class="mt-4 space-y-4">
               @for (tp of m.top_products; track tp.name) {
                 <li>
-                  <div class="mb-1 flex items-center justify-between gap-2">
-                    <span class="truncate text-xs font-medium text-gray-600">{{ tp.name }}</span>
-                    <span class="shrink-0 text-xs font-bold text-brand-500">{{ tp.qty }}</span>
+                  <div class="mb-1.5 flex items-center justify-between gap-2">
+                    <span class="truncate text-xs font-medium" [style.color]="'var(--adm-text-secondary)'">{{ tp.name }}</span>
+                    <span class="shrink-0 text-xs font-bold text-[var(--adm-primary)]">{{ tp.qty }}</span>
                   </div>
-                  <div class="h-2 w-full overflow-hidden rounded-full bg-cream-100">
+                  <div class="h-1.5 w-full overflow-hidden rounded-full" [style.background]="'var(--adm-bg-subtle)'">
                     <div
-                      class="h-full rounded-full bg-accent-500"
+                      class="h-full rounded-full bg-[var(--adm-primary)] transition-all duration-500"
                       [style.width.%]="topWidth(tp.qty)"
                     ></div>
                   </div>
@@ -106,32 +102,30 @@ import { CopPipe } from '../../../shared/pipes/cop.pipe';
         </div>
       </div>
 
-      <!-- Desglose por estado -->
-      <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div class="adm-stagger mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         @for (s of statusBreakdown(); track s.key) {
-          <div class="rounded-xl border border-cream-200 bg-white p-3 text-center shadow-sm">
-            <p class="text-xl font-bold text-gray-900">{{ s.value }}</p>
-            <p class="mt-0.5 text-[11px] font-medium text-gray-400">{{ s.label }}</p>
+          <div class="adm-card p-3 text-center">
+            <p class="text-xl font-bold" [style.color]="'var(--adm-text)'">{{ s.value }}</p>
+            <p class="mt-0.5 text-[11px] font-medium" [style.color]="'var(--adm-text-muted)'">{{ s.label }}</p>
           </div>
         }
       </div>
 
-      <!-- Últimos pedidos -->
-      <div class="mt-5 rounded-2xl border border-cream-200 bg-white p-5 shadow-sm">
-        <h2 class="mb-4 text-base font-semibold text-gray-800">Últimos pedidos</h2>
+      <div class="adm-card mt-6 p-5">
+        <h2 class="text-base font-semibold" [style.color]="'var(--adm-text)'">Últimos pedidos</h2>
         @if (orders().length === 0) {
-          <p class="text-sm text-gray-400">Aún no hay pedidos registrados.</p>
+          <p class="mt-4 text-sm" [style.color]="'var(--adm-text-muted)'">Aún no hay pedidos registrados.</p>
         } @else {
-          <ul class="divide-y divide-cream-100">
+          <ul class="mt-4 divide-y adm-divider">
             @for (order of orders().slice(0, 6); track order.id) {
               <li class="flex items-center justify-between gap-3 py-3">
                 <div class="min-w-0">
-                  <p class="truncate text-sm font-semibold text-gray-800">#{{ order.orderNumber }}</p>
-                  <p class="truncate text-xs text-gray-500">{{ order.customerName }}</p>
+                  <p class="truncate text-sm font-semibold" [style.color]="'var(--adm-text)'">#{{ order.orderNumber }}</p>
+                  <p class="truncate text-xs" [style.color]="'var(--adm-text-muted)'">{{ order.customerName }}</p>
                 </div>
                 <div class="flex shrink-0 items-center gap-3">
-                  <span class="text-sm font-bold text-brand-500">{{ order.total | cop }}</span>
-                  <span class="rounded-full bg-cream-100 px-2.5 py-1 text-[11px] font-medium text-brand-600">
+                  <span class="text-sm font-bold text-[var(--adm-primary)]">{{ order.total | cop }}</span>
+                  <span class="rounded-full px-2.5 py-1 text-[11px] font-medium" [style.background]="'var(--adm-bg-subtle)'" [style.color]="'var(--adm-primary)'">
                     {{ statusLabels[order.status] }}
                   </span>
                 </div>
@@ -141,7 +135,7 @@ import { CopPipe } from '../../../shared/pipes/cop.pipe';
         }
       </div>
     } @else {
-      <p class="text-sm text-gray-400">No se pudieron cargar las métricas.</p>
+      <p class="text-sm" [style.color]="'var(--adm-text-muted)'">No se pudieron cargar las métricas.</p>
     }
   `,
 })

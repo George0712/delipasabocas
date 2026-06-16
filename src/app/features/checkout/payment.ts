@@ -27,98 +27,61 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CopPipe, FlowHeader, QrImage, WhatsappButton],
   template: `
+    <div class="app-shell app-page">
     <app-flow-header title="Pago" />
 
     <main class="px-4 pb-44 pt-2">
-      <h2 class="mb-4 text-base font-semibold text-gray-800">
-        4. Realiza tu pago
-      </h2>
-
-      <p class="mb-3 text-xs text-gray-500">
-        Realiza el pago por Nequi o Transferencia Bancolombia
-      </p>
+      <h2 class="app-heading mb-4">4. Realiza tu pago</h2>
+      <p class="app-subheading mb-3">Realiza el pago por Nequi o Transferencia Bancolombia</p>
 
       <div class="grid grid-cols-2 gap-3">
         @for (method of methods; track method.id) {
-          <button
-            type="button"
-            (click)="selectMethod(method.id)"
-            class="rounded-xl border bg-white py-3 text-sm font-semibold transition"
-            [class.border-brand-500]="selected() === method.id"
-            [class.text-brand-600]="selected() === method.id"
-            [class.border-cream-200]="selected() !== method.id"
-            [class.text-gray-600]="selected() !== method.id"
-          >
+          <button type="button" (click)="selectMethod(method.id)" class="app-chip" [class.app-chip-active]="selected() === method.id">
             {{ method.label }}
           </button>
         }
       </div>
 
-      <div class="mt-5 rounded-2xl border border-cream-200 bg-white p-4">
+      <div class="app-card mt-5 p-4">
         @if (selected() === 'nequi') {
-          <p class="text-sm font-semibold text-gray-800">Nequi</p>
-          <app-qr-image
-            class="my-4 block"
-            [src]="nequiQrImage"
-            alt="Código QR de Nequi para pagar"
-          />
-          <p class="text-center text-sm text-gray-600">
-            o al número
-            <span class="font-semibold text-gray-900">{{ business().nequi }}</span>
+          <p class="app-text text-sm font-semibold">Nequi</p>
+          <app-qr-image class="my-4 block" [src]="nequiQrImage" alt="Código QR de Nequi para pagar" />
+          <p class="app-text-secondary text-center text-sm">
+            o al número <span class="app-text font-semibold">{{ business().nequi }}</span>
           </p>
         } @else {
-          <p class="text-sm font-semibold text-gray-800">Bancolombia</p>
-          <p class="mt-3 text-sm text-gray-600">Ahorros</p>
-          <p class="text-lg font-bold text-gray-900">
-            {{ business().bancolombiaAccount }}
-          </p>
-          <p class="mt-1 text-sm text-gray-600">
-            Titular: {{ business().bancolombiaHolder }}
-          </p>
+          <p class="app-text text-sm font-semibold">Bancolombia</p>
+          <p class="app-text-secondary mt-3 text-sm">Ahorros</p>
+          <p class="app-text text-lg font-bold">{{ business().bancolombiaAccount }}</p>
+          <p class="app-text-secondary mt-1 text-sm">Titular: {{ business().bancolombiaHolder }}</p>
         }
       </div>
 
-      <div class="mt-6 rounded-2xl border border-green-100 bg-green-50/60 p-4">
-        <p class="text-sm font-medium text-gray-700">¿Ya pagaste?</p>
-        <p class="mb-3 mt-0.5 text-xs text-gray-500">
-          Envíanos el comprobante por WhatsApp para verificar tu pago más
-          rápido. También podrás hacerlo al confirmar el pedido.
+      <div class="app-alert-success mt-6">
+        <p class="app-text text-sm font-medium">¿Ya pagaste?</p>
+        <p class="app-text-muted mb-3 mt-0.5 text-xs">
+          Envíanos el comprobante por WhatsApp para verificar tu pago más rápido.
+          También podrás hacerlo al confirmar el pedido.
         </p>
-        <app-whatsapp-button
-          label="Enviar comprobante por WhatsApp"
-          variant="soft"
-          [fullWidth]="true"
-          [message]="receiptMessage()"
-        />
+        <app-whatsapp-button label="Enviar comprobante por WhatsApp" variant="soft" [fullWidth]="true" [message]="receiptMessage()" />
       </div>
     </main>
 
-    <footer
-      class="fixed inset-x-0 bottom-0 space-y-3 border-t border-cream-200 bg-cream-50/95 p-4 backdrop-blur"
-    >
-      <app-whatsapp-button
-        class="absolute bottom-full right-4 mb-3"
-        variant="icon"
-        [message]="supportMessage()"
-      />
-      <div class="flex justify-between text-base font-bold text-gray-900">
+    <footer class="app-footer-bar">
+      <app-whatsapp-button class="absolute bottom-full right-4 mb-3" variant="icon" [message]="supportMessage()" />
+      <div class="app-text flex justify-between text-base font-bold">
         <span>Total</span>
         <span>{{ orderState.total() | cop }}</span>
       </div>
-      <button
-        type="button"
-        [disabled]="submitting()"
-        (click)="placeOrder()"
-        class="w-full rounded-xl bg-brand-500 py-3.5 text-sm font-semibold text-white shadow-md transition enabled:hover:bg-brand-600 disabled:opacity-40"
-      >
+      <button type="button" [disabled]="submitting()" (click)="placeOrder()" class="app-btn-primary w-full">
         {{ submitting() ? 'Enviando...' : 'Realizar pedido' }}
       </button>
       @if (error()) {
-        <p class="text-center text-xs text-red-500">{{ error() }}</p>
+        <p class="text-center text-xs text-red-600">{{ error() }}</p>
       }
     </footer>
-  `,
-})
+    </div>
+  `,})
 export class Payment implements OnInit {
   private readonly orderService = inject(OrderService);
   private readonly settingsService = inject(BusinessSettingsService);

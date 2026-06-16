@@ -32,112 +32,43 @@ interface ClockNumber {
       type="button"
       (click)="toggle()"
       [disabled]="disabled()"
-      class="flex w-full items-center justify-between rounded-xl border border-cream-200 bg-white px-3 py-2.5 text-left text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 disabled:opacity-50"
+      class="app-input flex w-full items-center justify-between text-left disabled:opacity-50"
     >
-      <span [class.text-gray-400]="!value()">
+      <span [class.app-text-muted]="!value()">
         {{ value() ? displayTime() : 'Selecciona la hora' }}
       </span>
-      <svg viewBox="0 0 24 24" class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2">
+      <svg viewBox="0 0 24 24" class="app-text-muted h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="9" />
         <path stroke-linecap="round" d="M12 7v5l3 2" />
       </svg>
     </button>
 
     @if (open()) {
-      <div class="fixed inset-0 z-40 bg-black/20" (click)="cancel()"></div>
-      <div
-        class="fixed left-1/2 top-1/2 z-50 w-[19rem] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-cream-200 bg-white p-5 shadow-2xl"
-      >
-        <!-- Lectura digital -->
+      <div class="app-modal-overlay" (click)="cancel()"></div>
+      <div class="app-modal-panel">
         <div class="mb-4 flex items-center justify-center gap-2">
-          <button
-            type="button"
-            (click)="mode.set('hours')"
-            class="rounded-lg px-2 py-1 text-3xl font-bold tabular-nums"
-            [class.text-brand-500]="mode() === 'hours'"
-            [class.text-gray-400]="mode() !== 'hours'"
-          >
-            {{ hour12String() }}
-          </button>
-          <span class="text-3xl font-bold text-gray-400">:</span>
-          <button
-            type="button"
-            (click)="mode.set('minutes')"
-            class="rounded-lg px-2 py-1 text-3xl font-bold tabular-nums"
-            [class.text-brand-500]="mode() === 'minutes'"
-            [class.text-gray-400]="mode() !== 'minutes'"
-          >
-            {{ minuteString() }}
-          </button>
+          <button type="button" (click)="mode.set('hours')" class="rounded-lg px-2 py-1 text-3xl font-bold tabular-nums" [class.app-text-primary]="mode() === 'hours'" [class.app-text-muted]="mode() !== 'hours'">{{ hour12String() }}</button>
+          <span class="app-text-muted text-3xl font-bold">:</span>
+          <button type="button" (click)="mode.set('minutes')" class="rounded-lg px-2 py-1 text-3xl font-bold tabular-nums" [class.app-text-primary]="mode() === 'minutes'" [class.app-text-muted]="mode() !== 'minutes'">{{ minuteString() }}</button>
           <div class="ml-2 flex flex-col gap-1">
-            <button
-              type="button"
-              (click)="setPeriod('AM')"
-              class="rounded-md px-2 py-0.5 text-xs font-semibold"
-              [class.bg-brand-500]="period() === 'AM'"
-              [class.text-white]="period() === 'AM'"
-              [class.text-gray-500]="period() !== 'AM'"
-            >
-              AM
-            </button>
-            <button
-              type="button"
-              (click)="setPeriod('PM')"
-              class="rounded-md px-2 py-0.5 text-xs font-semibold"
-              [class.bg-brand-500]="period() === 'PM'"
-              [class.text-white]="period() === 'PM'"
-              [class.text-gray-500]="period() !== 'PM'"
-            >
-              PM
-            </button>
+            <button type="button" (click)="setPeriod('AM')" class="rounded-md px-2 py-0.5 text-xs font-semibold" [style.background]="period() === 'AM' ? 'var(--app-primary)' : 'transparent'" [class.text-white]="period() === 'AM'" [class.app-text-muted]="period() !== 'AM'">AM</button>
+            <button type="button" (click)="setPeriod('PM')" class="rounded-md px-2 py-0.5 text-xs font-semibold" [style.background]="period() === 'PM' ? 'var(--app-primary)' : 'transparent'" [class.text-white]="period() === 'PM'" [class.app-text-muted]="period() !== 'PM'">PM</button>
           </div>
         </div>
 
-        <!-- Esfera del reloj -->
-        <div class="relative mx-auto h-56 w-56 rounded-full bg-cream-100">
-          <span
-            class="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500"
-          ></span>
+        <div class="app-clock-face relative mx-auto h-56 w-56">
+          <span class="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full" [style.background]="'var(--app-primary)'"></span>
           @if (selectedAngle() !== null) {
-            <span
-              class="absolute bottom-1/2 left-1/2 w-0.5 origin-bottom -translate-x-1/2 bg-brand-500"
-              [style.height.px]="80"
-              [style.transform]="'translateX(-50%) rotate(' + selectedAngle() + 'deg)'"
-            ></span>
+            <span class="absolute bottom-1/2 left-1/2 w-0.5 origin-bottom -translate-x-1/2" [style.height.px]="80" [style.background]="'var(--app-primary)'" [style.transform]="'translateX(-50%) rotate(' + selectedAngle() + 'deg)'"></span>
           }
           @for (n of clockNumbers(); track n.label) {
-            <button
-              type="button"
-              [disabled]="n.disabled"
-              (click)="pickNumber(n.value)"
-              class="absolute grid h-9 w-9 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-sm transition"
-              [style.left.px]="n.x"
-              [style.top.px]="n.y"
-              [class.bg-brand-500]="n.selected"
-              [class.text-white]="n.selected"
-              [class.text-gray-700]="!n.selected && !n.disabled"
-              [class.opacity-25]="n.disabled"
-            >
-              {{ n.label }}
-            </button>
+            <button type="button" [disabled]="n.disabled" (click)="pickNumber(n.value)" class="absolute grid h-9 w-9 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-sm transition" [style.left.px]="n.x" [style.top.px]="n.y" [style.background]="n.selected ? 'var(--app-primary)' : null" [class.text-white]="n.selected" [class.app-text-secondary]="!n.selected && !n.disabled" [class.opacity-25]="n.disabled">{{ n.label }}</button>
           }
         </div>
 
         <div class="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            (click)="cancel()"
-            class="rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-cream-100"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            (click)="confirm()"
-            class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600"
-          >
-            Listo
-          </button>
+          <button type="button" (click)="cancel()" class="app-btn-ghost">Cancelar</button>
+          <button type="button" (click)="confirm()" class="app-btn-primary px-4 py-2">Listo</button>
         </div>
       </div>
     }

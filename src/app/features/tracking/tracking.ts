@@ -38,12 +38,9 @@ interface Step {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CopPipe, DateCoPipe, TimeCoPipe, RouterLink, WhatsappButton],
   template: `
+    <div class="app-shell app-page">
     <header class="flex items-center px-4 pt-5">
-      <a
-        routerLink="/"
-        aria-label="Volver al inicio"
-        class="flex items-center gap-2.5 text-accent-600 transition active:scale-95"
-      >
+      <a routerLink="/" aria-label="Volver al inicio" class="flex items-center gap-2.5 text-[var(--app-primary)] transition active:scale-95">
         <svg viewBox="0 0 24 24" class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 10.5 12 3l9 7.5" />
           <path d="M5 9.5V21h14V9.5" />
@@ -54,126 +51,66 @@ interface Step {
     </header>
 
     <main class="mx-auto max-w-md px-4 pb-16 pt-4">
-      <h1 class="mb-1 text-xl font-bold text-gray-900">Seguimiento de pedido</h1>
-      <p class="mb-5 text-sm text-gray-500">
-        Consulta el estado de tu pedido con su número.
-      </p>
+      <h1 class="app-heading mb-1">Seguimiento de pedido</h1>
+      <p class="app-subheading mb-5">Consulta el estado de tu pedido con su número.</p>
 
       <form (submit)="$event.preventDefault(); search()" class="mb-6 flex gap-2">
-        <div
-          class="flex flex-1 items-center rounded-xl border border-cream-200 bg-white px-3"
-        >
-          <span class="text-sm text-gray-400">#</span>
-          <input
-            [value]="query()"
-            (input)="onInput($event)"
-            placeholder="DPB-000123"
-            class="w-full bg-transparent px-1 py-2.5 text-sm uppercase focus:outline-none"
-          />
+        <div class="flex flex-1 items-center rounded-xl border px-3" [style.border-color]="'var(--app-border)'" [style.background]="'var(--app-surface)'">
+          <span class="app-text-muted text-sm">#</span>
+          <input [value]="query()" (input)="onInput($event)" placeholder="DPB-000123" class="w-full bg-transparent px-1 py-2.5 text-sm uppercase focus:outline-none" />
         </div>
-        <button
-          type="submit"
-          class="rounded-xl bg-brand-500 px-4 text-sm font-semibold text-white transition hover:bg-brand-600"
-        >
-          Buscar
-        </button>
+        <button type="submit" class="shrink-0 rounded-xl px-4 text-sm font-semibold text-white transition hover:opacity-90" [style.background]="'var(--app-primary)'">Buscar</button>
       </form>
 
       @if (loading()) {
         <div class="space-y-3">
-          <div class="h-24 animate-pulse rounded-2xl bg-cream-200"></div>
-          <div class="h-64 animate-pulse rounded-2xl bg-cream-200"></div>
+          <div class="app-skeleton h-24"></div>
+          <div class="app-skeleton h-64"></div>
         </div>
       } @else if (loadError()) {
-        <div
-          class="rounded-2xl border border-red-100 bg-red-50 p-6 text-center"
-        >
-          <p class="text-sm text-red-600">
-            Ocurrió un error al consultar el pedido. Revisa tu conexión e
-            inténtalo de nuevo.
-          </p>
+        <div class="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+          <p class="text-sm text-red-600">Ocurrió un error al consultar el pedido. Revisa tu conexión e inténtalo de nuevo.</p>
         </div>
       } @else if (notFound()) {
-        <div
-          class="rounded-2xl border border-cream-200 bg-white p-6 text-center"
-        >
-          <p class="text-sm text-gray-600">
-            No encontramos un pedido con el número
-            <span class="font-semibold">#{{ query() }}</span>. Verifica e
-            inténtalo de nuevo.
+        <div class="app-card p-6 text-center">
+          <p class="app-text-secondary text-sm">
+            No encontramos un pedido con el número <span class="app-text font-semibold">#{{ query() }}</span>. Verifica e inténtalo de nuevo.
           </p>
         </div>
       } @else if (tracking(); as t) {
-        <div class="rounded-2xl border border-cream-200 bg-white p-5 shadow-sm">
+        <div class="app-card p-5">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-xs uppercase tracking-wide text-gray-400">Pedido</p>
-              <p class="text-lg font-extrabold text-brand-500">
-                #{{ t.orderNumber }}
-              </p>
+              <p class="app-eyebrow">Pedido</p>
+              <p class="app-text-primary text-lg font-extrabold">#{{ t.orderNumber }}</p>
             </div>
-            <span
-              class="rounded-full px-3 py-1 text-xs font-semibold"
-              [class.bg-red-100]="t.status === 'cancelled'"
-              [class.text-red-600]="t.status === 'cancelled'"
-              [class.bg-brand-50]="t.status !== 'cancelled'"
-              [class.text-brand-600]="t.status !== 'cancelled'"
-            >
+            <span class="rounded-full px-3 py-1 text-xs font-semibold" [class.bg-red-100]="t.status === 'cancelled'" [class.text-red-600]="t.status === 'cancelled'" [style.background]="t.status !== 'cancelled' ? 'var(--app-bg-subtle)' : null" [class.app-text-primary]="t.status !== 'cancelled'">
               {{ statusLabels[t.status] }}
             </span>
           </div>
 
           <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <dt class="text-xs text-gray-400">Cliente</dt>
-              <dd class="font-medium text-gray-800">{{ t.customerName }}</dd>
-            </div>
-            <div>
-              <dt class="text-xs text-gray-400">Total</dt>
-              <dd class="font-medium text-gray-800">{{ t.total | cop }}</dd>
-            </div>
-            <div>
-              <dt class="text-xs text-gray-400">Entrega</dt>
-              <dd class="font-medium text-gray-800">
-                {{ t.deliveryDate | dateCo }}
-              </dd>
-            </div>
-            <div>
-              <dt class="text-xs text-gray-400">Hora</dt>
-              <dd class="font-medium text-gray-800">
-                {{ t.deliveryTime | timeCo }}
-              </dd>
-            </div>
-            <div class="col-span-2">
-              <dt class="text-xs text-gray-400">Dirección de entrega</dt>
-              <dd class="font-medium leading-snug text-gray-800">{{ t.address }}</dd>
-            </div>
+            <div><dt class="app-text-muted text-xs">Cliente</dt><dd class="app-text font-medium">{{ t.customerName }}</dd></div>
+            <div><dt class="app-text-muted text-xs">Total</dt><dd class="app-text font-medium">{{ t.total | cop }}</dd></div>
+            <div><dt class="app-text-muted text-xs">Entrega</dt><dd class="app-text font-medium">{{ t.deliveryDate | dateCo }}</dd></div>
+            <div><dt class="app-text-muted text-xs">Hora</dt><dd class="app-text font-medium">{{ t.deliveryTime | timeCo }}</dd></div>
+            <div class="col-span-2"><dt class="app-text-muted text-xs">Dirección de entrega</dt><dd class="app-text font-medium leading-snug">{{ t.address }}</dd></div>
           </dl>
 
           @if (t.items.length > 0) {
-            <div class="mt-4 border-t border-cream-100 pt-4">
-              <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                Tu pedido
-              </p>
+            <div class="app-divider mt-4 border-t pt-4">
+              <p class="app-eyebrow mb-2">Tu pedido</p>
               <ul class="space-y-2">
                 @for (item of t.items; track $index) {
                   <li class="flex items-start justify-between gap-2 text-sm">
-                    <span class="min-w-0 flex-1 leading-snug text-gray-700">
-                      <span class="font-semibold text-gray-900">{{ item.quantity }}×</span>
-                      {{ item.productName }}
-                    </span>
-                    <span class="shrink-0 font-medium text-gray-800">
-                      {{ item.subtotal | cop }}
-                    </span>
+                    <span class="app-text-secondary min-w-0 flex-1 leading-snug"><span class="app-text font-semibold">{{ item.quantity }}×</span> {{ item.productName }}</span>
+                    <span class="app-text shrink-0 font-medium">{{ item.subtotal | cop }}</span>
                   </li>
                 }
               </ul>
               @if (t.shippingCost > 0) {
-                <div
-                  class="mt-2 flex justify-between border-t border-dashed border-cream-100 pt-2 text-xs text-gray-500"
-                >
-                  <span>Domicilio</span>
-                  <span>{{ t.shippingCost | cop }}</span>
+                <div class="app-divider mt-2 flex justify-between border-t border-dashed pt-2 text-xs app-text-muted">
+                  <span>Domicilio</span><span>{{ t.shippingCost | cop }}</span>
                 </div>
               }
             </div>
@@ -181,55 +118,32 @@ interface Step {
         </div>
 
         @if (t.status === 'cancelled') {
-          <div
-            class="mt-4 rounded-2xl border border-red-100 bg-red-50 p-5 text-center text-sm text-red-600"
-          >
-            Este pedido fue cancelado. Si crees que es un error, contáctanos por
-            WhatsApp.
+          <div class="mt-4 rounded-2xl border border-red-200 bg-red-50 p-5 text-center text-sm text-red-600">
+            Este pedido fue cancelado. Si crees que es un error, contáctanos por WhatsApp.
           </div>
         } @else {
           <ol class="mt-5">
             @for (step of steps(); track step.status; let last = $last) {
               <li class="relative flex gap-4 pb-7 last:pb-0">
                 @if (!last) {
-                  <span
-                    class="absolute left-4 top-8 bottom-0 w-0.5 -translate-x-1/2"
-                    [class.bg-brand-500]="step.reached"
-                    [class.bg-cream-200]="!step.reached"
-                  ></span>
+                  <span class="absolute left-4 top-8 bottom-0 w-0.5 -translate-x-1/2" [style.background]="step.reached ? 'var(--app-primary)' : 'var(--app-border)'"></span>
                 }
                 <span
                   class="relative z-10 grid h-8 w-8 shrink-0 place-items-center rounded-full border-2 text-xs font-bold transition"
-                  [class.border-brand-500]="step.reached"
-                  [class.bg-brand-500]="step.reached"
+                  [style.border-color]="step.reached ? 'var(--app-primary)' : 'var(--app-border)'"
+                  [style.background]="step.reached ? 'var(--app-primary)' : 'var(--app-surface)'"
                   [class.text-white]="step.reached"
-                  [class.border-cream-200]="!step.reached"
-                  [class.bg-white]="!step.reached"
-                  [class.text-gray-300]="!step.reached"
+                  [class.app-text-muted]="!step.reached"
                 >
-                  @if (step.reached) {
-                    ✓
-                  } @else {
-                    {{ $index + 1 }}
-                  }
+                  @if (step.reached) { ✓ } @else { {{ $index + 1 }} }
                 </span>
                 <div class="pt-1">
-                  <p
-                    class="text-sm font-semibold leading-tight"
-                    [class.text-gray-900]="step.reached || step.current"
-                    [class.text-gray-400]="!step.reached"
-                  >
-                    {{ step.label }}
-                  </p>
+                  <p class="text-sm font-semibold leading-tight" [class.app-text]="step.reached || step.current" [class.app-text-muted]="!step.reached">{{ step.label }}</p>
                   @if (step.timestamp) {
-                    <p class="mt-0.5 text-xs text-gray-400">{{ step.timestamp }}</p>
+                    <p class="app-text-muted mt-0.5 text-xs">{{ step.timestamp }}</p>
                   }
                   @if (step.current) {
-                    <span
-                      class="mt-1 inline-block rounded-full bg-accent-400/20 px-2 py-0.5 text-xs font-medium text-accent-600"
-                    >
-                      Estado actual
-                    </span>
+                    <span class="mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium" [style.background]="'var(--app-bg-subtle)'" [class.app-text-primary]="true">Estado actual</span>
                   }
                 </div>
               </li>
@@ -237,20 +151,18 @@ interface Step {
           </ol>
         }
       } @else {
-        <div
-          class="rounded-2xl border border-dashed border-cream-200 bg-white/60 p-6 text-center text-sm text-gray-400"
-        >
+        <div class="app-card border-dashed p-6 text-center app-text-muted text-sm">
           Ingresa el número de tu pedido para ver su estado.
         </div>
       }
     </main>
 
-    <!-- Botón de contacto siempre visible -->
     <div class="fixed bottom-5 right-4 z-30">
       <app-whatsapp-button
         label="Escríbenos"
         [message]="whatsappMessage()"
       />
+    </div>
     </div>
   `,
 })

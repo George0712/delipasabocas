@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { adminGuard } from './core/guards/admin.guard';
+import { adminGuestGuard } from './core/guards/admin-guest.guard';
 
 export const routes: Routes = [
   {
@@ -51,6 +52,7 @@ export const routes: Routes = [
     path: 'admin/login',
     loadComponent: () =>
       import('./features/admin/login/login').then((m) => m.Login),
+    canActivate: [adminGuestGuard],
     title: 'Ingresar | Admin',
   },
   {
